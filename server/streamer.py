@@ -1,18 +1,28 @@
 from twython import TwythonStreamer
 from AntiBullyStreamer import AntiBullyStreamer 
 
-APP_KEY = "BjGHwZOKOrNYWXyaj3dBg"
-APP_SECRET = "26sZrjNVwG9aypd2HqxUvy2yaCqFoDLGkedJrzFQ8"
-OAUTH_TOKEN = "542734581-nmvfSkR2PJfKEm1XE3SAqwn3kQ19lreSNvb6GyhD"
-OAUTH_TOKEN_SECRET = "3aiNEiW1BrYPjFeqJov9EVgZr0bmqxvXnjNybFhQ8Vx1g"
+#Load APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET from twitter_credentials.secret
+#Note: twiter_credentials.secret will contain keys and tokens for the @AntiBullyBot account and 
+#should not be pushed onto public git repository. 
 
+s = open('twitter_credentials.secret','r')
+secrets = s.read().splitlines()
+s.close()
 
-#Get list of 
+APP_KEY = secrets[0] 
+APP_SECRET = secrets[1]
+OAUTH_TOKEN = secrets[2]
+OAUTH_TOKEN_SECRET = secrets[3]
+
+#Get list of terms for twitter to push to our server from tracklist.txt.
+#Twitter doesn't support regex search, so optimizing tracklist.txt for finding relevant
+#tweets might be necessary. 
 f = open('tracklist.txt','r')
 tracklist = ""
 
+#comma separate the list of terms for twitter to push to our server
 for line in f:
-	tracklist += line + "," 
+	tracklist += line + ", " 
 
 f.close()
 
