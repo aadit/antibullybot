@@ -20,15 +20,17 @@ class AntiBullyStreamer(TwythonStreamer):
 			"text": data["text"],
 			"tweet_id": data["id"]
 		}
-		t_id = self.raw_tweets.insert(data)
-		#t_id = self.raw_tweets.insert(tweet)
-		#print 'Count:'
-		#print self.raw_tweets.count()
 
-		#print ''
-		#print 'Saved Tweet'
-		#print tweet['screen_name'] + '-' + tweet['text']
-		#print ''
+		if "@" in data["text"]:
+			t_id = self.raw_tweets.insert(data)
+			#t_id = self.raw_tweets.insert(tweet)
+			#print 'Count:'
+			#print self.raw_tweets.count()
+
+			print ''
+			print 'Saved Tweet'
+			print tweet['screen_name'] + '-' + tweet['text']
+			print ''
 
 
 	def on_error(self, status_code, data):
