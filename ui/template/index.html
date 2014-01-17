@@ -37,10 +37,11 @@
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
         <h2>{{text}}</h2>
-        <form action="/" method="get">
-          <button class="btn btn-lg btn-danger" value=1 >Bully</button>
+        <form action="/vote" method="post">
+          <input type="hidden" name="id" value="{{_id}}"/>
+          <button class="btn btn-lg btn-danger" value=1 name="bully" >Bully</button>
           or
-          <button class="btn btn-lg btn-primary" value=0>Not</button> ?
+          <button class="btn btn-lg btn-primary" value=0 name="bully">Not</button> ?
         </form>
       </div>
 

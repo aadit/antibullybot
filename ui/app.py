@@ -4,19 +4,30 @@ from os import path
 from random import randint
 from pymongo import MongoClient
 
+
+def tweet():
+    client = MongoClient()
+    db = client.antibullybot
+    raw_tweet_count = db.raw_tweets.count()
+    idx = randint(0,raw_tweet_count)        
+    rec = db.raw_tweets.find().limit(-1).skip(idx).next()
+    return rec
+
+
 class MainHandler(tornado.web.RequestHandler):
 
-    def tweet(self):
-        client = MongoClient()
-        db = client.antibullybot
-        raw_tweet_count = db.raw_tweets.count()
-        idx = randint(0,raw_tweet_count)        
-        rec = db.raw_tweets.find().limit(-1).skip(idx).next()
-        return rec
-
     def get(self):
-        rec = self.tweet()
+        rec = tweet()
         self.render("index.html",**rec)
+
+
+class VoteHandler(tornado.web.RequestHandler):
+
+    def post(self):
+        print self.get_argument("bully"),self.get_argument("id")
+        self.redirect('/', permanent=False)
+
+
 
 root = path.abspath('.')
 settings = {
@@ -32,6 +43,7 @@ settings = {
 
 application = tornado.web.Application([
     (r"/", MainHandler),
+    (r"/vote", VoteHandler)
 ],**settings)
 
 if __name__ == "__main__":
