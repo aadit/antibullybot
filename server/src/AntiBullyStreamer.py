@@ -27,10 +27,10 @@ class AntiBullyStreamer(TwythonStreamer):
 			#print 'Count:'
 			#print self.raw_tweets.count()
 
-			print ''
-			print 'Saved Tweet'
-			print tweet['screen_name'] + '-' + tweet['text']
-			print ''
+			#print ''
+			#print 'Saved Tweet'
+			#print tweet['screen_name'] + '-' + tweet['text']
+			#print ''
 
 
 	def on_error(self, status_code, data):
