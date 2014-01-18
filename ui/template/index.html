@@ -1,7 +1,10 @@
+{% from ttp import ttp %}
+{% autoescape None %}
 <!DOCTYPE html>
 <html>
   <head>
     <title>Bootstrap 101 Template</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Bootstrap -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -36,7 +39,7 @@
 
       <!-- Main component for a primary marketing message or call to action -->
       <div class="jumbotron">
-        <h2>{{text}}</h2>
+        <h2>{{ ttp.Parser().parse(text).html.encode("utf-8") }}</h2>
         <form action="/vote" method="post">
           <input type="hidden" name="id" value="{{_id}}"/>
           <button class="btn btn-lg btn-danger" value=1 name="bully" >Bully</button>
