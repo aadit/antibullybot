@@ -35,6 +35,9 @@ class VoteHandler(tornado.web.RequestHandler):
         
         self.redirect('/', permanent=False)
 
+    def get(self):
+        self.redirect('/',permanent=False)
+
 
 
 root = path.abspath('.')
