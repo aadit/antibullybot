@@ -10,7 +10,7 @@ db = client.antibullybot
 
 def tweet():
     raw_tweet_count = db.raw_tweets.count()
-    idx = randint(0,raw_tweet_count)        
+    idx = randint(0,raw_tweet_count-1)        
     rec = db.raw_tweets.find().limit(-1).skip(idx).next()
     return rec
 
