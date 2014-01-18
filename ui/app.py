@@ -3,11 +3,12 @@ import tornado.web
 from os import path
 from random import randint
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 
+client = MongoClient()
+db = client.antibullybot
 
 def tweet():
-    client = MongoClient()
-    db = client.antibullybot
     raw_tweet_count = db.raw_tweets.count()
     idx = randint(0,raw_tweet_count)        
     rec = db.raw_tweets.find().limit(-1).skip(idx).next()
@@ -24,7 +25,14 @@ class MainHandler(tornado.web.RequestHandler):
 class VoteHandler(tornado.web.RequestHandler):
 
     def post(self):
-        print self.get_argument("bully"),self.get_argument("id")
+        mongo_id = ObjectId(self.get_argument("id"))
+        post = {"bully":self.get_argument("bully")}
+        db.raw_tweets.update({'_id':mongo_id}, {"$set": post}, upsert=False)
+        
+        #Check its updated
+        foo = db.raw_tweets.find_one({'_id':mongo_id})
+        print foo["bully"], foo["text"]
+        
         self.redirect('/', permanent=False)
 
 
