@@ -5,7 +5,7 @@ import argparse
 #Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-r","--remote", help = "Remote host where the database is saved")
-parser.add_argument("-t", "--table", help= "The raw tweets table name you'd like stats for")
+parser.add_argument("-c", "--collection", help= "The raw tweets collection name you'd like stats for")
 args = parser.parse_args()
 
 
@@ -13,7 +13,7 @@ c = MongoClient(args.remote or 'localhost')
 db = c.antibullybot
 db.authenticate('antibullybot','antibully')
 
-raw_tweets = db[args.database or 'raw_tweets']
+raw_tweets = db[args.collection or 'raw_tweets']
 
 
 bully_tweets = raw_tweets.find({"bully": "1"})

@@ -5,7 +5,9 @@ import argparse
 
 #Parse arguments
 parser = argparse.ArgumentParser()
-parser.add_argument("-t", "--verbose-tweets", help="Show tweets that are saved to the DB", action="store_true")
+parser.add_argument("table", help ="The table name you want to save this crawl on")
+parser.add_argument("-r","--remote", help = "Remote location of the database")
+parser.add_argument("-vt", "--verbose-tweets", help="Show tweets that are saved to the DB", action="store_true")
 args = parser.parse_args()
 
 
@@ -36,5 +38,5 @@ for line in f:
 f.close()
 
 stream = AntiBullyStreamer(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-stream.db_connect(args.vebose_tweets)
+stream.db_connect(args.table, args.remote or "localhost", args.verbose_tweets)
 stream.statuses.filter(track = tracklist)

@@ -4,12 +4,12 @@ from pymongo import MongoClient
 
 class AntiBullyStreamer(TwythonStreamer):
 
-	def db_connect(self, echo_tweets = False):
+	def db_connect(self, table_name = "raw_tweets_2", remote = "localhost", echo_tweets = False):
 
-		client = MongoClient()
+		client = MongoClient(remote)
 		db = client.antibullybot
 		db.authenticate('antibullybot','antibully')
-		self.raw_tweets = db.raw_tweets_2
+		self.raw_tweets = db[table_name]
 		self.echo_tweets = echo_tweets
 
 
