@@ -1,5 +1,13 @@
 from twython import TwythonStreamer
 from AntiBullyStreamer import AntiBullyStreamer 
+import argparse
+
+
+#Parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("-t", "--verbose-tweets", help="Show tweets that are saved to the DB", action="store_true")
+args = parser.parse_args()
+
 
 #Load APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET from twitter_credentials.secret
 #Note: twiter_credentials.secret will contain keys and tokens for the @AntiBullyBot account and 
@@ -16,6 +24,7 @@ OAUTH_TOKEN_SECRET = secrets[3]
 
 #Get list of terms for twitter to push to our server from tracklist.txt.
 #Twitter doesn't support regex search, so optimizing tracklist.txt for finding relevant
+
 #tweets might be necessary. 
 f = open('tracklist.txt','r')
 tracklist = ""
@@ -27,5 +36,5 @@ for line in f:
 f.close()
 
 stream = AntiBullyStreamer(APP_KEY, APP_SECRET, OAUTH_TOKEN, OAUTH_TOKEN_SECRET)
-stream.db_connect()
+stream.db_connect(args.vebose_tweets)
 stream.statuses.filter(track = tracklist)

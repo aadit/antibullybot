@@ -1,8 +1,20 @@
 from pymongo import MongoClient
+import argparse
 
-c = MongoClient()
+
+#Parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("-r","--remote", help = "Remote host where the database is saved")
+parser.add_argument("-t", "--table", help= "The raw tweets table name you'd like stats for")
+args = parser.parse_args()
+
+
+c = MongoClient(args.remote or 'localhost')
 db = c.antibullybot
-raw_tweets = db.raw_tweets
+db.authenticate('antibullybot','antibully')
+
+raw_tweets = db[args.database or 'raw_tweets']
+
 
 bully_tweets = raw_tweets.find({"bully": "1"})
 nonbully_tweets = raw_tweets.find({"bully": "0"})
