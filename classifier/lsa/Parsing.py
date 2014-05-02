@@ -107,11 +107,11 @@ for i in range(100) :
     wl1 = [random.choice(WORDS) for i in range(10)]
     wl1.append('cookies')
     wl1.append('biscuits')
-    wl2 = [random.choice(WORDS) for i in range(10)]
-    wl2.append('biscuits')
-    wl2.append('pastries')
+    #wl2 = [random.choice(WORDS) for i in range(10)]
+    #wl2.append('biscuits')
+    #wl2.append('pastries')
     m.add(wl1)
-    m.add(wl2)
+    #m.add(wl2)
 
 # <codecell>
 
@@ -119,7 +119,7 @@ m.comat.shape
 
 # <codecell>
 
-m.do_svd(10)
+m.do_svd(100)
 
 # <codecell>
 
@@ -128,11 +128,11 @@ vc = m.projection('cookies')
 # <codecell>
 
 vb = m.projection('biscuits')
-vp = m.projection('pastries')
+#vp = m.projection('pastries')
 
 # <codecell>
 
-comp_cos(vc,vp)
+#comp_cos(vc,vp)
 
 # <codecell>
 
@@ -140,27 +140,19 @@ comp_cos(vc,vb)
 
 # <codecell>
 
-comp_cos(vb,vp)
+uu,ss,vv = linalg.svd(m.comat)
 
 # <codecell>
 
-vsnb = m.projection('advice')
+ssd = np.diag(ss)
 
 # <codecell>
 
-comp_cos(vsnb, vc)
+ssd.shape
 
 # <codecell>
 
-m.comat[m.words_to_i['cookies'], m.words_to_i['advice']]
-
-# <codecell>
-
-vsnb
-
-# <codecell>
-
-vc
+ssd
 
 # <codecell>
 
