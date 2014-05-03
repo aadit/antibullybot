@@ -7,13 +7,14 @@ import numpy as np
 import itertools
 import string
 from scipy import linalg
+from sklearn import decomposition
 
 # <codecell>
 
 class CoMatrix:
     # Builds co-occurrence matrix.
     words_to_i = {}
-    comat = np.zeros((0,0))   
+    comat = np.zeros((0,0))  
     u = np.zeros((0,0))
     s = np.zeros((0,0))
     
@@ -48,10 +49,23 @@ class CoMatrix:
         word_pairs = itertools.permutations(word_list, 2)
         for i,j in word_pairs :
             CoMatrix.comat[CoMatrix.words_to_i[i], CoMatrix.words_to_i[j]] += 1
+
+        for i in word_list:
+            self.comat[self.words_to_i[i], self.words_to_i[i]] += 1
+
+
             
         #print CoMatrix.comat
+
+    def add_ones(self):
+        # add ones along diag
+        CoMatrix.comat = np.add(CoMatrix.comat, np.diag(np.ones((1, CoMatrix.comat.shape[0]))))
         
     def do_svd(self, k) :
+        svd = decomposition.TruncatedSVD(n_components=20, n_iterations=10)
+
+        self.svd_output = svd.fit_transform(self.comat)
+
         """ Does svd and stores the u and s truncated matrices. k is the number of principal dimensions."""
         CoMatrix.u,CoMatrix.s,v = linalg.svd(CoMatrix.comat)
         CoMatrix.s = np.diag(CoMatrix.s)
@@ -88,7 +102,7 @@ def comp_cos(a,b) :
 
 """ Testing """
 """ Check simpel co-occurrence. """
-word_file = "/usr/share/dict/british-english"
+word_file = "british-english"
 WORDS = open(word_file).read().splitlines()
 
 # <codecell>
@@ -103,8 +117,8 @@ import random
 
 m = CoMatrix()
 m.reset()
-for i in range(100) :
-    wl1 = [random.choice(WORDS) for i in range(10)]
+for i in range(20) :
+    wl1 = [random.choice(WORDS) for i in range(2)]
     wl1.append('cookies')
     wl1.append('biscuits')
     #wl2 = [random.choice(WORDS) for i in range(10)]
@@ -112,6 +126,8 @@ for i in range(100) :
     #wl2.append('pastries')
     m.add(wl1)
     #m.add(wl2)
+
+#m.add_ones()
 
 # <codecell>
 
