@@ -7,6 +7,7 @@ import numpy as np
 import itertools
 import string
 from scipy import linalg
+from sklearn import decomposition
 
 # <codecell>
 
@@ -45,15 +46,22 @@ class CoMatrix:
             ind += 1
             
         # Update the matrix.
-        word_pairs = itertools.permutations(word_list, 2)
+        word_pairs = itertools.product(word_list, word_list)
         for i,j in word_pairs :
             CoMatrix.comat[CoMatrix.words_to_i[i], CoMatrix.words_to_i[j]] += 1
+            
             
         #print CoMatrix.comat
         
     def do_svd(self, k) :
         """ Does svd and stores the u and s truncated matrices. k is the number of principal dimensions."""
+        #svd = decomposition.TruncatedSVD(n_components=100, n_iterations=10)
+        #CoMatrix.svd_output = svd.fit_transform(CoMatrix.comat)
+        
         CoMatrix.u,CoMatrix.s,v = linalg.svd(CoMatrix.comat)
+        #CoMatrix.u = CoMatrix.u[:, 1:]
+        #CoMatrix.s = CoMatrix.s[1:]
+        #CoMatrix.u = np.transpose(CoMatrix.u)
         CoMatrix.s = np.diag(CoMatrix.s)
         CoMatrix.u = CoMatrix.u[:, 0:k]
         CoMatrix.s = CoMatrix.s[0:k, 0:k]
@@ -107,10 +115,12 @@ for i in range(100) :
     wl1 = [random.choice(WORDS) for i in range(10)]
     wl1.append('cookies')
     wl1.append('biscuits')
+    #.append('pastries')
     #wl2 = [random.choice(WORDS) for i in range(10)]
     #wl2.append('biscuits')
     #wl2.append('pastries')
     m.add(wl1)
+    #m.add([random.choice(WORDS) for i in range(10)])
     #m.add(wl2)
 
 # <codecell>
@@ -132,27 +142,25 @@ vb = m.projection('biscuits')
 
 # <codecell>
 
-#comp_cos(vc,vp)
-
-# <codecell>
-
 comp_cos(vc,vb)
 
 # <codecell>
 
-uu,ss,vv = linalg.svd(m.comat)
+vas = m.projection('assails')
 
 # <codecell>
 
-ssd = np.diag(ss)
+comp_cos(vc,vas)
 
 # <codecell>
 
-ssd.shape
+comp_cos(vb,vas)
 
 # <codecell>
 
-ssd
+for word in m.words_to_i :
+    if comp_cos(vb, m.projection(word)) > .7 : 
+        print word
 
 # <codecell>
 
