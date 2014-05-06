@@ -17,6 +17,7 @@ class CoMatrix:
     comat = np.zeros((0,0))   
     u = np.zeros((0,0))
     s = np.zeros((0,0))
+    n_components = 0
     
     def reset(self) :
         self.words_to_i = {}
@@ -57,7 +58,9 @@ class CoMatrix:
         #self.svd = decomposition.TruncatedSVD(n_components=100, n_iterations=5)
         #self.svd_output = self.svd.fit_transform(self.comat)
         
+	self.n_components = k
         self.u,self.s,v = linalg.svd(self.comat)
+	#print self.u.shape, self.s.shape
         self.s = np.diag(self.s)
         self.u = self.u[:, 0:k]
         self.s = self.s[0:k, 0:k] 
@@ -73,9 +76,9 @@ class CoMatrix:
             
     def context_vector(self, word_list) :
         """ Given a word_list, computes the corresponding context vector by summing over all the words. """
-        c_vector = np.zeros((1,k))
+        c_vector = np.zeros((1,self.n_components))
         for word in word_list :
-            pr = projection(word)
+            pr = self.projection(word)
             if pr.shape[0] == 0 :
                 print "Error: word not seen before";
             else :
