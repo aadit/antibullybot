@@ -11,7 +11,7 @@ from sklearn import decomposition
 
 # <codecell>
 
-class CoMatrix:
+class :
     # Builds co-occurrence matrix.
     words_to_i = {}
     comat = np.zeros((0,0))   
@@ -19,58 +19,57 @@ class CoMatrix:
     s = np.zeros((0,0))
     
     def reset(self) :
-        CoMatrix.words_to_i = {}
-        CoMatrix.comat = np.zeros((0,0))
+        self.words_to_i = {}
+        self.comat = np.zeros((0,0))
     
     def add(self, word_list) :
         """ Given a word_list, which is a list of words, updates the co-occurrence matrix. """
         # First, count the number of new words to re-shape the matrix.
-        new_words = [word for word in word_list if word not in CoMatrix.words_to_i]
+        new_words = [word for word in word_list if word not in self.words_to_i]
         new_words_count = len(new_words)
         
         
         # Re-shape existing co-occurrence matrix to accommodate new words.
-        if CoMatrix.comat.shape[0] is 0 :
-            CoMatrix.comat = np.zeros((new_words_count, new_words_count))
+        if self.comat.shape[0] is 0 :
+            self.comat = np.zeros((new_words_count, new_words_count))
         else:
-            cols = np.zeros((CoMatrix.comat.shape[0], new_words_count))
-            rows = np.zeros((new_words_count, CoMatrix.comat.shape[1] + new_words_count))
-            CoMatrix.comat = np.hstack((CoMatrix.comat, cols))
-            CoMatrix.comat = np.vstack((CoMatrix.comat, rows))
+            cols = np.zeros((self.comat.shape[0], new_words_count))
+            rows = np.zeros((new_words_count, self.comat.shape[1] + new_words_count))
+            self.comat = np.hstack((self.comat, cols))
+            self.comat = np.vstack((self.comat, rows))
         
             
         # Add new words to the map.
-        ind = len(CoMatrix.words_to_i)
+        ind = len(self.words_to_i)
         for word in new_words :
-            CoMatrix.words_to_i[word] = ind
+            self.words_to_i[word] = ind
             ind += 1
             
         # Update the matrix.
         word_pairs = itertools.product(word_list, word_list)
         for i,j in word_pairs :
-            CoMatrix.comat[CoMatrix.words_to_i[i], CoMatrix.words_to_i[j]] += 1
+            self.comat[self.words_to_i[i], self.words_to_i[j]] += 1
             
-            
-        #print CoMatrix.comat
+        #print self.comat
         
     def do_svd(self, k) :
         """ Does svd and stores the u and s truncated matrices. k is the number of principal dimensions."""
-        #CoMatrix.svd = decomposition.TruncatedSVD(n_components=100, n_iterations=5)
-        #CoMatrix.svd_output = CoMatrix.svd.fit_transform(CoMatrix.comat)
+        #self.svd = decomposition.TruncatedSVD(n_components=100, n_iterations=5)
+        #self.svd_output = self.svd.fit_transform(self.comat)
         
-        CoMatrix.u,CoMatrix.s,v = linalg.svd(CoMatrix.comat)
-        CoMatrix.s = np.diag(CoMatrix.s)
-        CoMatrix.u = CoMatrix.u[:, 0:k]
-        CoMatrix.s = CoMatrix.s[0:k, 0:k] 
+        self.u,self.s,v = linalg.svd(self.comat)
+        self.s = np.diag(self.s)
+        self.u = self.u[:, 0:k]
+        self.s = self.s[0:k, 0:k] 
             
     def projection(self, word) :
         """ For a particular word, simply computes the projection by using the word_th row of u and \
         multiplying with s. """
-        if word not in CoMatrix.words_to_i:
+        if word not in self.words_to_i:
             print np.zeros((0,0))
         else :
-            return np.dot(CoMatrix.u[CoMatrix.words_to_i[word], :], CoMatrix.s)
-            #return CoMatrix.svd.transform(CoMatrix.comat[words_to_i[word]])
+            return np.dot(self.u[self.words_to_i[word], :], self.s)
+            #return self.svd.transform(self.comat[words_to_i[word]])
             
     def context_vector(self, word_list) :
         """ Given a word_list, computes the corresponding context vector by summing over all the words. """
@@ -82,45 +81,33 @@ class CoMatrix:
             else :
                 c_vector = np.add(c_vector, pr)
         return c_vector
-        
-    
 
-# <codecell>
+    def test(self):
 
-def comp_cos(a,b) :
-    return np.dot(a,b) / ( np.linalg.norm(a) * np.linalg.norm(b))
+        """ Testing """
+        """ Check simple co-occurrence. """
+        word_file = "british-english"
+        WORDS = open(word_file).read().splitlines()
+        no_words = len(WORDS)
 
-# <codecell>
+        import random
 
-""" Testing """
-""" Check simpel co-occurrence. """
-word_file = "/usr/share/dict/british-english"
-WORDS = open(word_file).read().splitlines()
+        m = self
+        m.reset()
+        for i in range(100) :
+            wl1 = [random.choice(WORDS) for i in range(10)]
+            wl1.append('cookies')
+            wl1.append('biscuits')
+            #.append('pastries')
+            wl2 = [random.choice(WORDS) for i in range(10)]
+            wl2.append('biscuits')
+            wl2.append('pastries') 
+            m.add(wl1)
+            #m.add([random.choice(WORDS) for i in range(10)])
+            m.add(wl2)
 
-# <codecell>
+    def comp_cos(a,b):
+        return np.dot(a,b) / ( np.linalg.norm(a) * np.linalg.norm(b))
 
-no_words = len(WORDS)
-
-# <codecell>
-
-import random
-
-# <codecell>
-
-m = CoMatrix()
-m.reset()
-for i in range(100) :
-    wl1 = [random.choice(WORDS) for i in range(10)]
-    wl1.append('cookies')
-    wl1.append('biscuits')
-    #.append('pastries')
-    wl2 = [random.choice(WORDS) for i in range(10)]
-    wl2.append('biscuits')
-    wl2.append('pastries') 
-    m.add(wl1)
-    #m.add([random.choice(WORDS) for i in range(10)])
-    m.add(wl2)
-
-# <codecell>
 
 

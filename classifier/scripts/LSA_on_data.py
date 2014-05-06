@@ -2,12 +2,13 @@
 # <nbformat>3.0</nbformat>
 
 # <codecell>
-
+import sys
+sys.path.append('..')
 import numpy as np
 import itertools
 import string
 from scipy import linalg
-from Parsing import CoMatrix
+from lsa.Parsing import CoMatrix
 from pymongo import MongoClient
 import nltk
 
@@ -37,7 +38,7 @@ def tr_word(word) :
         if ch in string.ascii_lowercase or ch == '\'' :
             ret_word += ch
         elif ch == '#' :
-            ;
+            pass    
         else : return None
     return ret_word        
 
