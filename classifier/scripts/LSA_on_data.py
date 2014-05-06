@@ -20,7 +20,7 @@ raw_tweets = db['raw_tweets']
 
 # <codecell>
 
-LIMIT=30
+LIMIT=3
 all_raw_tweets = raw_tweets.find(limit=LIMIT)
 
 # <codecell>
@@ -51,10 +51,6 @@ def ch_range(word) :
 
 # <codecell>
 
-ch_range('hello')
-
-# <codecell>
-
 for rec in all_raw_tweets :
     tweet = rec['text']
     tweet_tokens = nltk.regexp_tokenize(tweet, r'\S+')
@@ -62,8 +58,8 @@ for rec in all_raw_tweets :
     tweet_tokens= set([str(string.lower(tkn)) for tkn in tweet_tokens if ch_range(tkn)])
     tweet_tokens = [tr_word(word) for word in tweet_tokens if tr_word(word) is not None]
     m.add(tweet_tokens)
-    #print tweet
-    #print tweet_tokens
+    print tweet
+    print tweet_tokens
 
 # <codecell>
 
