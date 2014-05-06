@@ -2,15 +2,20 @@
 # <nbformat>3.0</nbformat>
 
 # <codecell>
-import sys
-sys.path.append('..')
+
 import numpy as np
 import itertools
 import string
 from scipy import linalg
-from lsa.Parsing import CoMatrix
+#from Parsing import CoMatrix
 from pymongo import MongoClient
 import nltk
+from nltk.corpus import stopwords
+
+# <codecell>
+
+# Run this once to download stopwords corpus. 
+#nltk.download()
 
 # <codecell>
 
@@ -26,8 +31,8 @@ all_raw_tweets = raw_tweets.find(limit=LIMIT)
 
 # <codecell>
 
-m = CoMatrix()
-m.reset()
+#m = CoMatrix()
+#m.reset()
 
 # <codecell>
 
@@ -38,9 +43,9 @@ def tr_word(word) :
         if ch in string.ascii_lowercase or ch == '\'' :
             ret_word += ch
         elif ch == '#' :
-            pass    
+            ;
         else : return None
-    return ret_word        
+    return ret_word
 
 # <codecell>
 
@@ -52,13 +57,15 @@ def ch_range(word) :
 
 # <codecell>
 
+st_words = set(stopwords.words('english'))
+st_words.add('rt')
 for rec in all_raw_tweets :
     tweet = rec['text']
     tweet_tokens = nltk.regexp_tokenize(tweet, r'\S+')
     #print tweet_tokens
     tweet_tokens= set([str(string.lower(tkn)) for tkn in tweet_tokens if ch_range(tkn)])
-    tweet_tokens = [tr_word(word) for word in tweet_tokens if tr_word(word) is not None]
-    m.add(tweet_tokens)
+    tweet_tokens = [tr_word(word) for word in tweet_tokens if tr_word(word) is not None and tr_word(word) not in st_words]
+    #m.add(tweet_tokens)
     print tweet
     print tweet_tokens
 
@@ -69,6 +76,9 @@ m.comat.shape
 # <codecell>
 
 m.do_svd(50)
+
+# <codecell>
+
 
 # <codecell>
 
