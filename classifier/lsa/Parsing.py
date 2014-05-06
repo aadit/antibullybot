@@ -11,7 +11,7 @@ from sklearn import decomposition
 
 # <codecell>
 
-class :
+class CoMatrix:
     # Builds co-occurrence matrix.
     words_to_i = {}
     comat = np.zeros((0,0))   
