@@ -38,13 +38,13 @@ m.reset()
 # <codecell>
 
 def tr_word(word) :
-    ''' Returns word in which the only allowed punctuations are apostrophe and #. Removes #. '''
+    ''' Returns word in which the only allowed punctuations are apostrophe and # at the beginning. Removes #. '''
+    #remove leading hashtag if it exists
+    word = word.lstrip('#')
     ret_word = ''
     for ch in word :
         if ch in string.ascii_lowercase or ch == '\'' :
             ret_word += ch
-        elif ch == '#' :
-            pass
         else : return None
     return ret_word
 
@@ -58,16 +58,24 @@ def ch_range(word) :
 
 # <codecell>
 
-st_words = set(stopwords.words('english'))
-st_words.add('rt')
-for rec in all_raw_tweets :
-    tweet = rec['text']
-    tweet_tokens = nltk.regexp_tokenize(tweet, r'\S+')
-    #print tweet_tokens
-    tweet_tokens= set([str(string.lower(tkn)) for tkn in tweet_tokens if ch_range(tkn)])
-    tweet_tokens = [tr_word(word) for word in tweet_tokens if tr_word(word) is not None and tr_word(word) not in st_words]
-    m.add(tweet_tokens)
-    #print tweet
-    #print tweet_tokens
+def build_from_data(m, db_cursor) :
+	''' Updates co-occurrence matrix *m* by adding in tweets from *db_cursor*. '''
+
+	''' Keep *st_words* as a class variable. '''
+	st_words = set(stopwords.words('english'))
+	st_words.add('rt')
+	for rec in db_cursor:
+		tweet = rec['text']
+		# get individual words from the tweet. Here, a word is anything demarcated by whitespace (in particular, contains puncts)
+    		tweet_tokens = nltk.regexp_tokenize(tweet, r'\S+')
+		
+		# Check the range, and convert to lowercase. Range checking for ruling out unicode chars.
+		tweet_tokens= set([tr_word(str(string.lower(tkn))) for tkn in tweet_tokens if ch_range(tkn)])
+
+		# Check for stop-words.
+    		tweet_tokens = [word for word in tweet_tokens if word is not None and word not in st_words]
+
+		# Update matrix.
+		m.add(tweet_tokens)
 
 
