@@ -55,16 +55,13 @@ class CoMatrix:
         
     def do_svd(self, k) :
         """ Does svd and stores the u and s truncated matrices. k is the number of principal dimensions."""
-        svd = decomposition.TruncatedSVD(n_components=100, n_iterations=5)
-        CoMatrix.svd_output = svd.fit_transform(CoMatrix.comat)
+        #CoMatrix.svd = decomposition.TruncatedSVD(n_components=100, n_iterations=5)
+        #CoMatrix.svd_output = CoMatrix.svd.fit_transform(CoMatrix.comat)
         
-        #CoMatrix.u,CoMatrix.s,v = linalg.svd(CoMatrix.comat)
-        #CoMatrix.u = CoMatrix.u[:, 1:]
-        #CoMatrix.s = CoMatrix.s[1:]
-        #CoMatrix.u = np.transpose(CoMatrix.u)
-        #CoMatrix.s = np.diag(CoMatrix.s)
-        #CoMatrix.u = CoMatrix.u[:, 0:k]
-        #CoMatrix.s = CoMatrix.s[0:k, 0:k]
+        CoMatrix.u,CoMatrix.s,v = linalg.svd(CoMatrix.comat)
+        CoMatrix.s = np.diag(CoMatrix.s)
+        CoMatrix.u = CoMatrix.u[:, 0:k]
+        CoMatrix.s = CoMatrix.s[0:k, 0:k] 
             
     def projection(self, word) :
         """ For a particular word, simply computes the projection by using the word_th row of u and \
@@ -73,6 +70,7 @@ class CoMatrix:
             print np.zeros((0,0))
         else :
             return np.dot(CoMatrix.u[CoMatrix.words_to_i[word], :], CoMatrix.s)
+            #return CoMatrix.svd.transform(CoMatrix.comat[words_to_i[word]])
             
     def context_vector(self, word_list) :
         """ Given a word_list, computes the corresponding context vector by summing over all the words. """
@@ -85,7 +83,7 @@ class CoMatrix:
                 c_vector = np.add(c_vector, pr)
         return c_vector
         
-        
+    
 
 # <codecell>
 
@@ -118,53 +116,10 @@ for i in range(100) :
     #.append('pastries')
     wl2 = [random.choice(WORDS) for i in range(10)]
     wl2.append('biscuits')
-    wl2.append('pastries')
+    wl2.append('pastries') 
     m.add(wl1)
     #m.add([random.choice(WORDS) for i in range(10)])
     m.add(wl2)
-
-# <codecell>
-
-m.comat.shape
-
-# <codecell>
-
-m.do_svd(100)
-
-# <codecell>
-
-vc = m.projection('cookies')
-
-# <codecell>
-
-vb = m.projection('biscuits')
-#vp = m.projection('pastries')
-
-# <codecell>
-
-comp_cos(vc,vb)
-
-# <codecell>
-
-for word in m.words_to_i :
-    if comp_cos(vb, m.projection(word)) > .7 : 
-        print word, comp_cos(vb, m.projection(word))
-
-# <codecell>
-
-ar= m.comat[m.words_to_i['Hesse']]
-
-# <codecell>
-
-idx = np.nonzero(ar)
-
-# <codecell>
-
-ar[idx]
-
-# <codecell>
-
-idx
 
 # <codecell>
 
