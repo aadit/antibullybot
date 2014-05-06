@@ -28,7 +28,7 @@ raw_tweets = db['raw_tweets']
 # <codecell>
 
 LIMIT=300
-all_raw_tweets = raw_tweets.find(limit=LIMIT)
+db_cursor = raw_tweets.find(limit=LIMIT)
 
 # <codecell>
 
@@ -77,5 +77,10 @@ def build_from_data(m, db_cursor) :
 
 		# Update matrix.
 		m.add(tweet_tokens)
+
+''''' Function test() -- to be put in correct place. '''
+def test(m, db_cursor_bully, db_cursor_no_bully) :
+
+
 
 
