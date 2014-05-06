@@ -1,15 +1,9 @@
-# -*- coding: utf-8 -*-
-# <nbformat>3.0</nbformat>
-
-# <codecell>
-
 import numpy as np
 import itertools
 import string
 from scipy import linalg
 from sklearn import decomposition
 
-# <codecell>
 
 class CoMatrix:
     # Builds co-occurrence matrix.
@@ -57,13 +51,14 @@ class CoMatrix:
         """ Does svd and stores the u and s truncated matrices. k is the number of principal dimensions."""
         #self.svd = decomposition.TruncatedSVD(n_components=100, n_iterations=5)
         #self.svd_output = self.svd.fit_transform(self.comat)
-        
-	self.n_components = k
+
+        self.n_components = k
         self.u,self.s,v = linalg.svd(self.comat)
-	#print self.u.shape, self.s.shape
-        self.s = np.diag(self.s)
+        #print self.u.shape, self.s.shape
+        self.singular_values = self.s
+        self.s_untruncated = np.diag(self.s)
         self.u = self.u[:, 0:k]
-        self.s = self.s[0:k, 0:k] 
+        self.s = self.s_untruncated[0:k, 0:k] 
             
     def projection(self, word) :
         """ For a particular word, simply computes the projection by using the word_th row of u and \

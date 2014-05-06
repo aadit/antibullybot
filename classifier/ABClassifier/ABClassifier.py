@@ -27,30 +27,73 @@ class ABClassifier:
 		self.unlabeled_cursor = self.unlabeled_collection.find().limit(limit_unlabeled)
 		self.labeled_cursor = self.labeled_collection.find().limit(limit_labeled)
 
-		for i in self.unlabeled_cursor:
-			print i["text"]
 
-		for i in self.labeled_cursor:
-			print i["text"]
+	#Returns word in which the only allowed punctuations are apostrophe and # at the beginning. Removes #. '''
+	def tr_word(self,word) :
+	    #remove leading hashtag if it exists
+	    word = word.lstrip('#')
+	    ret_word = ''
+	    for ch in word :
+	        if ch in string.ascii_lowercase or ch == '\'' :
+	            ret_word += ch
+	        else : return None
+	    return ret_word
 
 
+	def ch_range(self, word) :
+	    for ch in word :
+	        if ord(ch) >= 128 :
+	            return False
+	    return True
 
-	def run_lsa(self):
+    def do_nltk(self, text):
+		# get individual words from the tweet. Here, a word is anything demarcated by whitespace (in particular, contains puncts)
+    	tweet_tokens = nltk.regexp_tokenize(tweet, r'\S+')
+		
+		# Check the range, and convert to lowercase. Range checking for ruling out unicode chars.
+		tweet_tokens= set([self.tr_word(str(string.lower(tkn))) for tkn in tweet_tokens if self.ch_range(tkn)])
 
-		#iterates over unlabeled cursor
-		#iterates over laeled cursor
-			#performs nltk
-			#adds into co occurrence
+		# Check for stop-words.
+		tweet_tokens = [word for word in tweet_tokens if word is not None and word not in st_words]
 
-		#comatrix.do_svd()
-		#
-		pass
+		return tweet_tokens
+
+
+	#Updates co-occurrence matrix *m* by adding in tweets from *db_cursor*.
+	def build_cooccurrence(m, db_cursor):
+		st_words = set(stopwords.words('english'))
+		st_words.add('rt')
+		for rec in db_cursor:
+			tweet = rec['text']
+			tweet_tokens = self.do_nltk(tweet)
+			# Update matrix.
+			m.add(tweet_tokens)
+
+	
+	#run lsa on unlabeled and labeled cursors
+	def run_lsa(self, k=100): 
+
+		self.m = CoMatrix()
+		self.m.reset()
+
+		#Build co-occurrence matrix 
+		self.build_cooccurrence(self.m, self.unlabeled_cursor)
+		self.build_cooccurrence(self.m, self.labeled_cursor)
+
+		self.m.do_svd(k)
+
+		#Reset cursors
+		self.unlabeled_cursor.rewind()
+		self.labeled_cursor.rewind()
+
+		return self.m
 
 	def compute_context_vectors(self):
 		pass
 
 
-
+	def perform_clustering(self, type = "SVM"):
+		pass
 
 
 
