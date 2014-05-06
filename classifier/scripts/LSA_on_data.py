@@ -2,7 +2,8 @@
 # <nbformat>3.0</nbformat>
 
 # <codecell>
-
+import sys
+sys.path.append('..')
 import numpy as np
 import itertools
 import string
@@ -14,7 +15,7 @@ from nltk.corpus import stopwords
 
 # <codecell>
 
-# Run this once to download stopwords corpus. 
+#Run this once to download stopwords corpus. 
 #nltk.download()
 
 # <codecell>
