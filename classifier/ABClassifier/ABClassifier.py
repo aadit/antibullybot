@@ -16,14 +16,22 @@ class ABClassifier:
 
  	def __init__(self, host = "aaditpatel.com", database_name = "antibullybot", unlabeled_data = "raw_tweets_4_27_2014", labeled_data = "labeled_data", username = "antibullybot", password ="antibully"):
 		
+		#MongoDB Connection Variables
 		self.connection = MongoClient('aaditpatel.com')
 		self.db = self.connection[database_name]
 		self.db.authenticate(username, password)
 		self.unlabeled_collection = self.db[unlabeled_data]
 		self.labeled_collection = self.db[labeled_data]
 
+		#CoOccurrence Matrix 
+		self.m = CoMatrix()
 
-	def get_cursors(self, limit_unlabeled = 100, limit_labeled = 100):
+		#Context Vectors
+		self.unlabeled_cv_list = []
+		self.labeled_cv_list = []
+
+
+	def download_cursors(self, limit_unlabeled = 100, limit_labeled = 100):
 		self.unlabeled_cursor = self.unlabeled_collection.find().limit(limit_unlabeled)
 		self.labeled_cursor = self.labeled_collection.find().limit(limit_labeled)
 
@@ -73,7 +81,6 @@ class ABClassifier:
 	#run lsa on unlabeled and labeled cursors
 	def run_lsa(self, k=100): 
 
-		self.m = CoMatrix()
 		self.m.reset()
 
 		#Build co-occurrence matrix 
@@ -89,7 +96,23 @@ class ABClassifier:
 		return self.m
 
 	def compute_context_vectors(self):
-		pass
+		self.unlabeled_cv_list = []
+		self.labeled_cv_list = []
+
+		#do for unlabeled data
+		for c in self.unlabeled_cursor:
+			text = c['text']
+			tweet_tokens = do_nltk(text)
+			cv = self.m.get_context_vector(tweet_tokens)
+			self.unlabeled_cv_list.append(cv)
+
+		#do for labeled data
+		for c in self.labeled_cursor:
+			tweet = c['text']
+			tweet_tokens = do_nltk(text)
+			cv = self.m.get_context_vector(tweet_tokens)
+			self.labeled_cv_list.append(cv)
+
 
 
 	def perform_clustering(self, type = "SVM"):

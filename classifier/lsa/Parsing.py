@@ -60,7 +60,7 @@ class CoMatrix:
         self.u = self.u[:, 0:k]
         self.s = self.s_untruncated[0:k, 0:k] 
             
-    def projection(self, word) :
+    def get_projection(self, word) :
         """ For a particular word, simply computes the projection by using the word_th row of u and \
         multiplying with s. """
         if word not in self.words_to_i:
@@ -69,7 +69,7 @@ class CoMatrix:
             return np.dot(self.u[self.words_to_i[word], :], self.s)
             #return self.svd.transform(self.comat[words_to_i[word]])
             
-    def context_vector(self, word_list) :
+    def get_context_vector(self, word_list) :
         """ Given a word_list, computes the corresponding context vector by summing over all the words. """
         c_vector = np.zeros((1,self.n_components))
         for word in word_list :
