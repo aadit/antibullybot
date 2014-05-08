@@ -1,6 +1,8 @@
 import sys
 sys.path.append('..')
 from lsa.Parsing import CoMatrix
+from classifier.kMeans import kMeans
+from classifier.SVM import SVM
 import numpy as np
 import itertools
 import string
@@ -33,7 +35,6 @@ class ABClassifier:
 		#Context Vectors
 		self.unlabeled_cv_list = []
 		self.labeled_cv_list = []
-
 
 	def download_cursors(self, limit_unlabeled = 100, limit_labeled = 100):
 		self.unlabeled_cursor = self.unlabeled_collection.find().limit(limit_unlabeled)
@@ -80,9 +81,18 @@ class ABClassifier:
 	def computing_cosine_similarities(self, cv1,cv2):
 		pass
 
-
+	def perform_clustering(self, type = "KMeans"):
+		array = self.transformInto2DArray(self.unlabeled_cv_list)
+		self.n = kMeans()
+		clusters = self.m.perform_Kmeans(array, 2)
+        
 	def perform_clustering(self, type = "SVM"):
-		pass
+		# classes holds labels for testing data -- to be defined
+		array = self.transformInto2DArray(self.labeled_cv_list)
+		self.o = SVM()
+		self.o.generate_model(array, classes)
+		unlabelled_data =  self.transformInto2DArray(self.unlabeled_cv_list)
+		classifiedLabels = self.o.predict(unlabelled_data)
 
 
 	"""PRIVATE METHODS"""
@@ -125,8 +135,19 @@ class ABClassifier:
 
 		return tweet_tokens
 
-	
-
+    # transforms Array of Lists into 2D Array for classification
+	def transformInto2DArray(self, unlabeled_cv_list):
+		Matrix = [[0 for x in xrange(len(unlabeled_cv_list[0]))] for x in xrange(len(unlabeled_cv_list))]
+		row = 0
+		column = 0
+		for i in np.nditer(unlabeled_cv_list):
+			Matrix[row][column] = i
+			column = column + 1
+			if column == len(unlabeled_cv_list[0]):
+				row = row + 1
+				column = 0    
+ 
+		return Matrix
 
 
 
