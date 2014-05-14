@@ -1,8 +1,8 @@
 import sys
 sys.path.append('..')
 from lsa.Parsing import CoMatrix
-from clustering.kMeans import kMeans
-from clustering.SVM import SVM
+#from classifier.kMeans import kMeans
+#from classifier.SVM import SVM
 import numpy as np
 import itertools
 import string
