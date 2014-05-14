@@ -8,7 +8,7 @@ from sklearn.svm import SVC
 from sklearn.datasets import load_digits
 
 
-class SVM
+class SVM:
     def __init__():
         clf = svm.SVC()
         
