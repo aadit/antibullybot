@@ -1,8 +1,8 @@
 import sys
 sys.path.append('..')
 from lsa.Parsing import CoMatrix
-from classifier.kMeans import kMeans
-from classifier.SVM import SVM
+#from classifier.kMeans import kMeans
+#from classifier.SVM import SVM
 import numpy as np
 import itertools
 import string
@@ -71,15 +71,29 @@ class ABClassifier:
 
 		#do for labeled data
 		for c in self.labeled_cursor:
-			tweet = c['text']
+			text = c['text']
 			tweet_tokens = self.do_nltk(text)
 			cv = self.m.get_context_vector(tweet_tokens)
 			self.labeled_cv_list.append(cv)
 
+		#Reset cursors
+		self.unlabeled_cursor.rewind()
+		self.labeled_cursor.rewind()
 
 
-	def computing_cosine_similarities(self, cv1,cv2):
-		pass
+	def compute_cosine_similarity(self, cv1,cv2):
+		return np.dot(cv1,np.transpose(cv2))/(np.linalg.norm(cv1) * np.linalg.norm(cv2))
+
+
+	def pairwise_similarity(self, cv_list):
+
+		indeces = range(len(cv_list))
+		keys = itertools.permutations(indeces, 2)
+		dist_map = {}
+		for i,j in keys :
+			dist_map[(i,j)] = self.compute_cosine_similarity(cv_list[i], cv_list[j])
+		return dist_map
+
 
 	def perform_clustering(self, type = "KMeans"):
 		array = self.transformInto2DArray(self.unlabeled_cv_list)
