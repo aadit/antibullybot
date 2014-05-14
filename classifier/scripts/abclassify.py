@@ -3,6 +3,7 @@ sys.path.append('..')
 from ABClassifier.ABClassifier import ABClassifier
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 ab = ABClassifier()

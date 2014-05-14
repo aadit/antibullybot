@@ -71,7 +71,7 @@ class CoMatrix:
             
     def get_context_vector(self, word_list) :
         """ Given a word_list, computes the corresponding context vector by summing over all the words. """
-        c_vector = np.zeros((1,self.n_components))
+        c_vector = np.zeros(self.n_components)
         for word in word_list :
             pr = self.get_projection(word)
             if pr.shape[0] == 0 :

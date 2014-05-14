@@ -82,7 +82,10 @@ class ABClassifier:
 
 
 	def compute_cosine_similarity(self, cv1,cv2):
-		return np.dot(cv1,np.transpose(cv2))/(np.linalg.norm(cv1) * np.linalg.norm(cv2))
+		if np.linalg.norm(cv1) == 0 or np.linalg.norm(cv2) == 0 :
+			return 0
+		else :
+			return np.inner(cv1,cv2)/(np.linalg.norm(cv1) * np.linalg.norm(cv2))
 
 
 	def pairwise_similarity(self, cv_list):
