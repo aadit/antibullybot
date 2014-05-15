@@ -116,13 +116,17 @@ class ABClassifier:
 
 	#Returns word in which the only allowed punctuations are apostrophe and # at the beginning. Removes #. '''
 	def tr_word(self,word) :
-	    #remove leading hashtag if it exists
-	    word = word.lstrip('#')
+	    # strip non-ascii chars
+	    ascii_word = self.strip_non_ascii(word) 
+	    if len(ascii_word) == 0 : return ''
+	    # if leading `@', return None
+	    if ascii_word[0] == '@' : return None
+	    # strip all puncts, except apostrophe
 	    ret_word = ''
-	    for ch in word :
+	    for ch in ascii_word :
 	        if ch in string.ascii_lowercase or ch == '\'' :
 	            ret_word += ch
-	        else : return None
+	        else : pass
 	    return ret_word
 
 
@@ -140,15 +144,23 @@ class ABClassifier:
 			# Update matrix.
 			m.add(tweet_tokens)
 
+	def strip_non_ascii(self, word) : 
+		ascii_word = ''
+		for ch in word : 
+			if ord(ch) < 128 :
+				ascii_word += ch
+			else : pass
+		return ascii_word
+
 	def do_nltk(self,tweet):
     	# get individual words from the tweet. Here, a word is anything demarcated by whitespace (in particular, contains puncts)
 		tweet_tokens = nltk.regexp_tokenize(tweet, r'\S+')
 		
 		# Check the range, and convert to lowercase. Range checking for ruling out unicode chars.
-		tweet_tokens= set([self.tr_word(str(string.lower(tkn))) for tkn in tweet_tokens if self.ch_range(tkn)])
+		tweet_tokens= set([self.tr_word(str(string.lower(self.strip_non_ascii(tkn)))) for tkn in tweet_tokens])
 
 		# Check for stop-words.
-		tweet_tokens = [word for word in tweet_tokens if word is not None and word not in self.st_words]
+		tweet_tokens = [word for word in tweet_tokens if word is not None and word not in self.st_words and word is not '']
 
 		return tweet_tokens
 
