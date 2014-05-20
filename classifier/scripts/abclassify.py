@@ -18,6 +18,3 @@ print "done getting pws"
 x = np.array(pws.values())
 a = np.asarray(x)
 np.savetxt('x.csv',a,delimiter=",")
-
-
-
