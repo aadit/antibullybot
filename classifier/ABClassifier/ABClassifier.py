@@ -70,6 +70,9 @@ class ABClassifier:
 			if np.linalg.norm(cv) == 0:
 				#print text
 				#print tweet_tokens
+				pass
+
+			else:
 				self.unlabeled_cv_list.append(cv)
 
 		#do for labeled data
@@ -79,8 +82,7 @@ class ABClassifier:
 			cv = self.m.get_context_vector(tweet_tokens)
 
 			if np.linalg.norm(cv) == 0:
-				#print text
-				#print tweet_tokens
+				pass
 			else:
 				self.labeled_cv_list.append(cv)
 
