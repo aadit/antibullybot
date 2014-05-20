@@ -19,7 +19,7 @@ class ABClassifier:
  	def __init__(self, host = "aaditpatel.com", database_name = "antibullybot", unlabeled_data = "raw_tweets_4_27_2014", labeled_data = "labeled_data", username = "antibullybot", password ="antibully"):
 		
 		#MongoDB Connection Variables
-		self.connection = MongoClient('aaditpatel.com')
+		self.connection = MongoClient(host)
 		self.db = self.connection[database_name]
 		self.db.authenticate(username, password)
 		self.unlabeled_collection = self.db[unlabeled_data]
