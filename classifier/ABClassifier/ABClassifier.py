@@ -34,11 +34,13 @@ class ABClassifier:
 
 		#Context Vectors
 		self.unlabeled_cv_list = []
-		self.labeled_cv_list = []
+		self.pos_labeled_cv_list = []
+		self.neg_labeled_cv_list = []
 
 	def download_cursors(self, limit_unlabeled = 100, limit_labeled = 100):
 		self.unlabeled_cursor = self.unlabeled_collection.find().limit(limit_unlabeled)
-		self.labeled_cursor = self.labeled_collection.find().limit(limit_labeled)
+		self.pos_labeled_cursor = self.labeled_collection.find({"bully":True}).limit(limit_labeled)
+		self.neg_labeled_cursor = self.labeled_collection.find({"bully":False}).limit(limit_labeled)
 
 
 	#run lsa on unlabeled and labeled cursors
@@ -48,19 +50,22 @@ class ABClassifier:
 
 		#Build co-occurrence matrix 
 		self.build_cooccurrence(self.m, self.unlabeled_cursor)
-		self.build_cooccurrence(self.m, self.labeled_cursor)
+		self.build_cooccurrence(self.m, self.pos_labeled_cursor)
+		self.build_cooccurrence(self.m, self.neg_labeled_cursor)
 
 		self.m.do_svd(k)
 
 		#Reset cursors
 		self.unlabeled_cursor.rewind()
-		self.labeled_cursor.rewind()
+		self.pos_labeled_cursor.rewind()
+		self.neg_labeled_cursor.rewind()
 
 		return self.m
 
 	def compute_context_vectors(self):
 		self.unlabeled_cv_list = []
-		self.labeled_cv_list = []
+		self.pos_labeled_cv_list = []
+		self.neg_labeled_cv_list = []
 
 		#do for unlabeled data
 		for c in self.unlabeled_cursor:
@@ -76,7 +81,7 @@ class ABClassifier:
 				self.unlabeled_cv_list.append(cv)
 
 		#do for labeled data
-		for c in self.labeled_cursor:
+		for c in self.pos_labeled_cursor:
 			text = c['text']
 			tweet_tokens = self.do_nltk(text)
 			cv = self.m.get_context_vector(tweet_tokens)
@@ -84,11 +89,22 @@ class ABClassifier:
 			if np.linalg.norm(cv) == 0:
 				pass
 			else:
-				self.labeled_cv_list.append(cv)
+				self.pos_labeled_cv_list.append(cv)
+
+		for c in self.neg_labeled_cursor:
+			text = c['text']
+			tweet_tokens = self.do_nltk(text)
+			cv = self.m.get_context_vector(tweet_tokens)
+
+			if np.linalg.norm(cv) == 0:
+				pass
+			else:
+				self.neg_labeled_cv_list.append(cv)
 
 		#Reset cursors
 		self.unlabeled_cursor.rewind()
-		self.labeled_cursor.rewind()
+		self.pos_labeled_cursor.rewind()
+		self.neg_labeled_cursor.rewind()
 
 
 	def compute_cosine_similarity(self, cv1,cv2):
