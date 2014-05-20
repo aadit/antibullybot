@@ -67,14 +67,22 @@ class ABClassifier:
 			text = c['text']
 			tweet_tokens = self.do_nltk(text)
 			cv = self.m.get_context_vector(tweet_tokens)
-			self.unlabeled_cv_list.append(cv)
+			if np.linalg.norm(cv) == 0:
+				#print text
+				#print tweet_tokens
+				self.unlabeled_cv_list.append(cv)
 
 		#do for labeled data
 		for c in self.labeled_cursor:
 			text = c['text']
 			tweet_tokens = self.do_nltk(text)
 			cv = self.m.get_context_vector(tweet_tokens)
-			self.labeled_cv_list.append(cv)
+
+			if np.linalg.norm(cv) == 0:
+				#print text
+				#print tweet_tokens
+			else:
+				self.labeled_cv_list.append(cv)
 
 		#Reset cursors
 		self.unlabeled_cursor.rewind()
