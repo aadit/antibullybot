@@ -1,12 +1,26 @@
 from pymongo import MongoClient
 import argparse
 import xml.etree.ElementTree as ET
+from HTMLParser import HTMLParser
 
+class MLStripper(HTMLParser):
+    def __init__(self):
+        self.reset()
+        self.fed = []
+    def handle_data(self, d):
+        self.fed.append(d)
+    def get_data(self):
+        return ''.join(self.fed)
+
+def strip_tags(html):
+    s = MLStripper()
+    s.feed(html)
+    return s.get_data()
 
 #Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument("-r","--remote", help = "Remote host where the database is saved")
-parser.add_argument("-c", "--collection", help= "The raw tweets collection name you'd like stats for")
+parser.add_argument("-c", "--collection", help= "The name of the collection to save the labeled data")
 args = parser.parse_args()
 
 c = MongoClient(args.remote or 'localhost')
@@ -17,7 +31,7 @@ if args.collection is None or args.collection == "":
 	exit("Need collection name -c collection name")
 
 labeled_data_mongo = db[args.collection]
-
+labeled_data_mongo.drop()
 
 
 tree = ET.parse('../labeled_data/formspring_labeled.xml')
@@ -44,11 +58,17 @@ for user in root:
 					if thing[0].text == "Yes":
 						bully_counts += 1
 
+			
+			text = text.replace("A:","")
+			text = text.replace("Q:","")
+			text = strip_tags(text)
+			bully = False #ideally not bully tweet
+
 			if bully_counts > 2:
-				text = text.replace("A:","")
-				text = text.replace("Q:","")
-				upload_document = {"text": text}
-				cyberbully_text.append(upload_document)
+				bully = True
+
+			upload_document = {"text": text, "bully":bully}
+			cyberbully_text.append(upload_document)
 
 
 labeled_data_mongo.insert(cyberbully_text)
