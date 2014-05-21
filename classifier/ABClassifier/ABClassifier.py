@@ -38,9 +38,9 @@ class ABClassifier:
 		self.neg_labeled_cv_list = []
 
 	def download_cursors(self, limit_unlabeled = 100, limit_labeled = 100):
-		self.unlabeled_cursor = self.unlabeled_collection.find().limit(limit_unlabeled)
-		self.pos_labeled_cursor = self.labeled_collection.find({"bully":True}).limit(limit_labeled)
-		self.neg_labeled_cursor = self.labeled_collection.find({"bully":False}).limit(limit_labeled)
+		self.unlabeled_cursor = self.unlabeled_collection.find(timeout=False).limit(limit_unlabeled)
+		self.pos_labeled_cursor = self.labeled_collection.find({"bully":True},timeout=False).limit(limit_labeled)
+		self.neg_labeled_cursor = self.labeled_collection.find({"bully":False},timeout=False).limit(limit_labeled)
 
 
 	#run lsa on unlabeled and labeled cursors
@@ -53,6 +53,7 @@ class ABClassifier:
 		self.build_cooccurrence(self.m, self.pos_labeled_cursor)
 		self.build_cooccurrence(self.m, self.neg_labeled_cursor)
 
+		print "computed co occurrence...starting svd"
 		self.m.do_svd(k)
 
 		#Reset cursors
@@ -164,9 +165,12 @@ class ABClassifier:
 
 	#Updates co-occurrence matrix *m* by adding in tweets from *db_cursor*.
 	def build_cooccurrence(self, m, db_cursor):
+		i = 0
 		for rec in db_cursor:
 			tweet = rec['text']
 			tweet_tokens = self.do_nltk(tweet)
+			print i
+			i=i+1
 			# Update matrix.
 			m.add(tweet_tokens)
 
