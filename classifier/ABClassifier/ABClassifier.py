@@ -18,6 +18,8 @@ class ABClassifier:
 
  	def __init__(self, host = "aaditpatel.com", database_name = "antibullybot", unlabeled_data = "raw_tweets_4_27_2014", labeled_data = "labeled_data", username = "antibullybot", password ="antibully"):
 		
+		print "Connecting to database at " + host + "..."
+
 		#MongoDB Connection Variables
 		self.connection = MongoClient(host)
 		self.db = self.connection[database_name]
@@ -37,23 +39,36 @@ class ABClassifier:
 		self.pos_labeled_cv_list = []
 		self.neg_labeled_cv_list = []
 
+		print "Connected."
+
 	def download_cursors(self, limit_unlabeled = 100, limit_labeled = 100, batch_size = 120):
+		
+		print "Downloading cursors with batch size " + str(batch_size) + "..."
+
 		self.unlabeled_cursor = self.unlabeled_collection.find(timeout=False).limit(limit_unlabeled).batch_size(batch_size)
 		self.pos_labeled_cursor = self.labeled_collection.find({"bully":True},timeout=False).limit(limit_labeled).batch_size(batch_size)
 		self.neg_labeled_cursor = self.labeled_collection.find({"bully":False},timeout=False).limit(limit_labeled).batch_size(batch_size)
+
+		print "Downloaded."
 
 
 	#run lsa on unlabeled and labeled cursors
 	def run_lsa(self, k=100): 
 
+		print "Running LSA with rank approximation " + str(k) + "..."
+
+
 		self.m.reset()
 
+		print "Computing Co-Occurrence Matrix..."
 		#Build co-occurrence matrix 
 		self.build_cooccurrence(self.m, self.unlabeled_cursor)
 		self.build_cooccurrence(self.m, self.pos_labeled_cursor)
 		self.build_cooccurrence(self.m, self.neg_labeled_cursor)
 
-		print "Computed CoOccurrence Matrix, starting SVD"
+		print "Computed."
+		print "Starting SVD..."
+		
 		self.m.do_svd(k)
 
 		#Reset cursors
@@ -63,7 +78,12 @@ class ABClassifier:
 
 		return self.m
 
-	def compute_context_vectors(self):
+		print "Finished SVD"
+
+	def compute_context_vectors(self, save_location):
+
+		print "Computing context vectors..."
+
 		self.unlabeled_cv_list = []
 		self.pos_labeled_cv_list = []
 		self.neg_labeled_cv_list = []
@@ -102,10 +122,26 @@ class ABClassifier:
 			else:
 				self.neg_labeled_cv_list.append(cv)
 
+		print "Saving context vectors at " + save_location + "..."
+		
+		l = np.array(self.pos_labeled_cv_list)
+		m = np.array(self.neg_labeled_cv_list)
+		n = np.array(self.unlabeled_cv_list)
+		ll = np.asarray(l)
+		mm = np.asarray(m)
+		nn = np.asarray(n)
+		np.savetxt(save_location + '/' + 'context_vectors_pos.csv', ll, delimiter=",")
+		np.savetxt(save_location + '/' + 'context_vectors_neg.csv', mm, delimiter=",")
+		np.savetxt(save_location + '/' + 'context_vectors_unl.csv', nn, delimiter=",")
+
+
 		#Reset cursors
 		self.unlabeled_cursor.rewind()
 		self.pos_labeled_cursor.rewind()
 		self.neg_labeled_cursor.rewind()
+
+
+		print "Done."
 
 
 	def compute_cosine_similarity(self, cv1,cv2):
