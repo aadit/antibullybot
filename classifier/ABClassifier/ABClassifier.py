@@ -37,10 +37,10 @@ class ABClassifier:
 		self.pos_labeled_cv_list = []
 		self.neg_labeled_cv_list = []
 
-	def download_cursors(self, limit_unlabeled = 100, limit_labeled = 100):
-		self.unlabeled_cursor = self.unlabeled_collection.find(timeout=False).limit(limit_unlabeled).batch_size(1000)
-		self.pos_labeled_cursor = self.labeled_collection.find({"bully":True},timeout=False).limit(limit_labeled)
-		self.neg_labeled_cursor = self.labeled_collection.find({"bully":False},timeout=False).limit(limit_labeled)
+	def download_cursors(self, limit_unlabeled = 100, limit_labeled = 100, batch_size = 120):
+		self.unlabeled_cursor = self.unlabeled_collection.find(timeout=False).limit(limit_unlabeled).batch_size(batch_size)
+		self.pos_labeled_cursor = self.labeled_collection.find({"bully":True},timeout=False).limit(limit_labeled).batch_size(batch_size)
+		self.neg_labeled_cursor = self.labeled_collection.find({"bully":False},timeout=False).limit(limit_labeled).batch_size(batch_size)
 
 
 	#run lsa on unlabeled and labeled cursors
