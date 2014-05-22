@@ -4,16 +4,16 @@ from ABClassifier.ABClassifier import ABClassifier
 import numpy as np
 import pickle
 
-ab = ABClassifier(host = "localhost")
+ab = ABClassifier()
 
 #pickle.dump(ab, open('saved_data/ab.p','wb'))
 
 print "Getting data..."
 ab.download_cursors(limit_unlabeled = 2500, limit_labeled = 2500)
 print "Data received."
-print "Performing SVD..."
+print "Performing LSA..."
 ab.run_lsa(k=100)
-print "SVD Complete."
+print "LSA Complete."
 print "Computing Context Vectors..."
 ab.compute_context_vectors()
 print "Context Vectors Complete."
