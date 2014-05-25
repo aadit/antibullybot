@@ -4,17 +4,18 @@ from ABClassifier.ABClassifier import ABClassifier
 import numpy as np
 import pickle
 
-ab = ABClassifier()
+ab = ABClassifier(host = "aaditpatel.com")
 
 #pickle.dump(ab, open('saved_data/ab.p','wb'))
 
 print "Getting data..."
-ab.download_cursors(limit_unlabeled = 2500, limit_labeled = 2500)
+ab.download_cursors(limit_unlabeled = 100, limit_labeled = 100)
 print "Data received."
 print "Performing LSA..."
 ab.run_lsa(k=100)
 print "LSA Complete."
 print "Computing Context Vectors..."
+
 ab.compute_context_vectors()
 print "Context Vectors Complete."
 print "Saving Context Vectors"
@@ -29,6 +30,7 @@ n = np.array(ab.unlabeled_cv_list)
 ll = np.asarray(l)
 mm = np.asarray(m)
 nn = np.asarray(n)
+
 
 np.savetxt('saved_data/pos_cv_labeled.csv', ll, delimiter=",")
 np.savetxt('saved_data/neg_cv_labeled.csv', mm, delimiter=",")

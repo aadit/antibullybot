@@ -2,11 +2,13 @@ import numpy as np
 import itertools
 import string
 from scipy import linalg
+from scipy import sparse
 from sklearn import decomposition
 
 
 class CoMatrix:
     # Builds co-occurrence matrix.
+    freq_dict = {}
     words_to_i = {}
     comat = np.zeros((0,0))   
     u = np.zeros((0,0))
@@ -16,49 +18,47 @@ class CoMatrix:
     def reset(self) :
         self.words_to_i = {}
         self.comat = np.zeros((0,0))
+        self.freq_dict = {}
     
     def add(self, word_list) :
-        """ Given a word_list, which is a list of words, updates the co-occurrence matrix. """
-        # First, count the number of new words to re-shape the matrix.
-        new_words = [word for word in word_list if word not in self.words_to_i]
-        new_words_count = len(new_words)
-        
-        
-        # Re-shape existing co-occurrence matrix to accommodate new words.
-        if self.comat.shape[0] is 0 :
-            self.comat = np.zeros((new_words_count, new_words_count))
-        else:
-            cols = np.zeros((self.comat.shape[0], new_words_count))
-            rows = np.zeros((new_words_count, self.comat.shape[1] + new_words_count))
-            self.comat = np.hstack((self.comat, cols))
-            self.comat = np.vstack((self.comat, rows))
-        
-            
-        # Add new words to the map.
+        word_pairs = itertools.product(set(word_list), set(word_list))
         ind = len(self.words_to_i)
-        for word in new_words :
-            self.words_to_i[word] = ind
-            ind += 1
-            
-        # Update the matrix.
-        word_pairs = itertools.product(word_list, word_list)
-        for i,j in word_pairs :
-            self.comat[self.words_to_i[i], self.words_to_i[j]] += 1
-            
-        #print self.comat
-        
+        for w in word_list :
+            if w not in self.words_to_i :
+                self.words_to_i[w] = ind
+                ind += 1
+        for pair in word_pairs :
+            if pair in self.freq_dict :
+                self.freq_dict[pair] += 1
+            else :
+                self.freq_dict[pair] = 1 
+
+    def sparsify(self) :
+        # Construct `dense' matrix
+        self.comat = np.zeros((len(self.words_to_i), len(self.words_to_i)))
+        for x,y in self.freq_dict :
+            self.comat[self.words_to_i[x],self.words_to_i[y]] = self.freq_dict[x,y]
+        # Sparsify 
+        self.comat = sparse.coo_matrix(self.comat)
+
     def do_svd(self, k) :
         """ Does svd and stores the u and s truncated matrices. k is the number of principal dimensions."""
         #self.svd = decomposition.TruncatedSVD(n_components=100, n_iterations=5)
         #self.svd_output = self.svd.fit_transform(self.comat)
 
+        # check for sparseness
+        self.sparsify()
         self.n_components = k
-        self.u,self.s,v = linalg.svd(self.comat)
+        self.u,self.s,v = sparse.linalg.svds(self.comat, k=self.n_components)
+
         #print self.u.shape, self.s.shape
         self.singular_values = self.s
         self.s_untruncated = np.diag(self.s)
+        self.s = np.diag(self.s)
+        '''self.s_untruncated = np.diag(self.s)
         self.u = self.u[:, 0:k]
-        self.s = self.s_untruncated[0:k, 0:k] 
+        self.s = self.s_untruncated[0:k, 0:k]  '''
+
             
     def get_projection(self, word) :
         """ For a particular word, simply computes the projection by using the word_th row of u and \
