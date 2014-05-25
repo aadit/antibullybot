@@ -5,13 +5,15 @@ from random import randint
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-client = MongoClient()
-db = client.antibullybot
+client = MongoClient(host = "aaditpatel.com")
+db = client["antibullybot"]
+db.authenticate("antibullybot", "antibully")
+
 
 def tweet():
-    raw_tweet_count = db.raw_tweets.count()
+    raw_tweet_count = db.tweets.count()
     idx = randint(0,raw_tweet_count-1)        
-    rec = db.raw_tweets.find().limit(-1).skip(idx).next()
+    rec = db.tweets.find().limit(-1).skip(idx).next()
     return rec
 
 
@@ -27,11 +29,11 @@ class VoteHandler(tornado.web.RequestHandler):
     def post(self):
         mongo_id = ObjectId(self.get_argument("id"))
         post = {"bully":self.get_argument("bully")}
-        db.raw_tweets.update({'_id':mongo_id}, {"$set": post}, upsert=False)
-        
-        #Check its updated
-        foo = db.raw_tweets.find_one({'_id':mongo_id})
-        print foo["bully"], foo["text"]
+
+        if post is 0 or post is 1:
+            db.tweets.update({'_id':mongo_id}, {"$set": post}, upsert=False)
+            foo = db.tweets.find_one({'_id':mongo_id})
+            print foo["bully"], foo["text"]
         
         self.redirect('/', permanent=False)
 
