@@ -80,6 +80,11 @@ class ABClassifier:
 
 		print "Finished SVD"
 
+	def get_context_vector(self, text):
+		tweet_tokens = self.do_nltk(text)
+		return self.m.get_context_vector(tweet_tokens)
+
+
 	def compute_context_vectors(self, save_location):
 
 		print "Computing context vectors..."

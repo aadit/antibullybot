@@ -64,7 +64,7 @@ class CoMatrix:
         """ For a particular word, simply computes the projection by using the word_th row of u and \
         multiplying with s. """
         if word not in self.words_to_i:
-            print np.zeros((0,0))
+            return np.zeros((0,0))
         else :
             return np.dot(self.u[self.words_to_i[word], :], self.s)
             #return self.svd.transform(self.comat[words_to_i[word]])
@@ -75,7 +75,8 @@ class CoMatrix:
         for word in word_list :
             pr = self.get_projection(word)
             if pr.shape[0] == 0 :
-                print "Error: word not seen before";
+                #print "Error: word not seen before"
+                pass
             else :
                 c_vector = np.add(c_vector, pr)
         return c_vector

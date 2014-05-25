@@ -1,6 +1,7 @@
 """
    Experiment 1: Compute Pairwise Similarities for 3 Data Sets: 
-   Posiitive Examples, Negative Examples, Unlabeled
+    -Positive Examples, Negative Examples, Unlabeled
+    -Vary the number of input tweets to the Co-Occurrence Matrix
 """
 
 
@@ -8,7 +9,6 @@ import sys
 sys.path.append('../..')
 from ABClassifier.ABClassifier import ABClassifier
 import numpy as np
-import pickle
 
 save_location = '../../experiment_data/experiment_1'
 
