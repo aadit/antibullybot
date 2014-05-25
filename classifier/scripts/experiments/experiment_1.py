@@ -13,7 +13,7 @@ import pickle
 save_location = '../../experiment_data/experiment_1'
 
 ab = ABClassifier()
-ab.download_cursors(limit_unlabeled = 250, limit_labeled = 250)
+ab.download_cursors(limit_unlabeled = 2500, limit_labeled = 2500)
 ab.run_lsa(k=100)
 ab.compute_context_vectors(save_location = save_location)
 
