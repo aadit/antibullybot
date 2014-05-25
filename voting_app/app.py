@@ -28,12 +28,15 @@ class VoteHandler(tornado.web.RequestHandler):
 
     def post(self):
         mongo_id = ObjectId(self.get_argument("id"))
-        post = {"bully":self.get_argument("bully")}
 
-        if post is 0 or post is 1:
+        label = self.get_argument("bully")
+
+
+        if label =='0' or label == '1':
+            post = {"bullying_label": label}
             db.tweets.update({'_id':mongo_id}, {"$set": post}, upsert=False)
             foo = db.tweets.find_one({'_id':mongo_id})
-            print foo["bully"], foo["text"]
+            print foo["bullying_label"], foo["text"]
         
         self.redirect('/', permanent=False)
 
