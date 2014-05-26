@@ -38,7 +38,7 @@ for k in k_list:
 
 
 
-for i in xrange(0,20):
+for i in xrange(0,1):
 	for k in k_list:
 
 		print "Running experiment for k = " + str(k)
@@ -49,8 +49,8 @@ for i in xrange(0,20):
 		print "Starting classification..."
 
 		unlabeled_cursor   = ab.db.tweets.find({"bullying_label" : {'$exists' :True}}, timeout = False)
-		pos_cursor = ab.labeled_collection.find({"bully":True},timeout=False).limit(unlabeled_cursor.count())
-		neg_cursor = ab.labeled_collection.find({"bully":False},timeout=False).limit(unlabeled_cursor.count())
+		pos_cursor = ab.labeled_collection.find({"bully":True},timeout=False).limit(limit_1)
+		neg_cursor = ab.labeled_collection.find({"bully":False},timeout=False).limit(limit_1)
 
 		unl = []
 		pos = []
