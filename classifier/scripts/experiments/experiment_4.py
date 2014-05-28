@@ -1,114 +1,58 @@
+"""
+   Experiment 4: Classify unlabelled tweets as bullying or nonbullying using SVM
+    -Positive Examples, Negative Examples, Unlabeled
+"""
 
 
-
-import random
-import math
-
-from time import time
-
-from sklearn import metrics
-from sklearn.cluster import KMeans
-from sklearn.datasets import load_digits
-
-
-import numpy as np;
-from numpy import genfromtxt
 
 import sys
 sys.path.append('../..')
 from ABClassifier.ABClassifier import ABClassifier
 import numpy as np
+from numpy import genfromtxt
 import sklearn as sk
+from sklearn import metrics
+from sklearn.cluster import KMeans
+from sklearn.datasets import load_digits
 import random
 from sklearn.metrics.pairwise import cosine_similarity
-from ABClassifier.clustering.SVM import SVM
+from clustering.SVM import SVM
 
 
 
-
-
-def transform(unlabeled_cv_list):
-	print len(unlabeled_cv_list)
-	Matrix = [[0 for x in xrange(len(unlabeled_cv_list[0]))] for x in xrange(len(unlabeled_cv_list))]
+def transform(contextVectorList):
+	Matrix = [[0 for x in xrange(len(contextVectorList[0]))] for x in xrange(len(contextVectorList))]
 	i = 0
 	j = 0
-	for i in range(len(unlabeled_cv_list)):
+	for i in range(len(contextVectorList)):
 		j=0
-		for j in range (len(unlabeled_cv_list[i])):	
-			Matrix[i][j] = unlabeled_cv_list[i][j]
+		for j in range (len(contextVectorList[i])):	
+			Matrix[i][j] = contextVectorList[i][j]
 			
-#		column = column + 1
-#		if column == len(unlabeled_cv_list[0]):
-#			row = row + 1
-#			column = 0    
-	return Matrix
+  	return Matrix
 
 
-def ttttt(unl):
-	abcdef = []
+def defineContextVectorMatrix(unl):
+	cvMatrix = []
 	for u in unl:
-		abcdef.append(u["cv"])
-	return transform(abcdef)
+		cvMatrix.append(u["cv"])
+	return transform(cvMatrix)
 	
-def perform_clustering(unlabeled_cv_list, Matrix ,c):
-	
-	print len(Matrix)
-	classes = [
-	1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		1,1,1,1,1,1,1,1,1,1,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0
-		]
+def perform_clustering(modelData, testData ,classes):
 	o = SVM()
-#	print len(Matrix)
-	o.generate_model(unlabeled_cv_list, c)
-		
-	
-		
-	classifiedLabels = o.predict(Matrix)
+	o.generate_model(modelData, classes)
+	classifiedLabels = o.predict(testData)
 	return classifiedLabels;
 
 
 
-save_location = 'E:/'
-limit_1 = 100
-limit_2 = 100
+save_location = '../../experiment_data/experiment_4'
+limit_1 = 300
+limit_2 = 300
 
 k_list = [100]
 
 for k in k_list:
-
 	print "Running experiment for k = " + str(k)
 	ab = ABClassifier()
 	ab.download_cursors(limit_unlabeled = limit_1, limit_labeled = limit_1)
@@ -143,60 +87,42 @@ for k in k_list:
 		neg.append(n_obj)
 		
 
-	aaa = []
+	model = neg
+	
 	poslen = len(pos)
 	
 	neglen = len(neg)
 	
-	for negl in range(len(neg)):
-		pos.append(neg[negl])
-	
-	aaa = ttttt(pos)
-		
 	classes = []
 	m = 0
 	n = 0
-	for m in range(poslen):
-		classes.append(1);
-	n = poslen
-	for n in range(poslen,len(pos)):
+	for m in range(len(model)):
 		classes.append(0);
-	positive_set = []
-	negative_set = []
-
-	xyz = ttttt(unl);
-	print len(xyz)
-	abc =  perform_clustering(aaa, xyz, classes)
-	print abc
+	n = 0
+	for n in range(0,poslen-20):
+		classes.append(1);	
+	for posl in range(len(pos)-20):
+		model.append(pos[posl])
 	
+	model = defineContextVectorMatrix(model)
+		
+	testData = defineContextVectorMatrix(unl);
+	clusteredData =  perform_clustering(model, testData, classes)
+	print clusteredData
 	
-	for y in range(len(abc)):
-		if abc[y] > 0:
-			x = y
-			#print unl[y]["text"].encode('utf-8')
+	positive_file = open(save_location + "/positive_set_" + str(k) + ".txt", 'wb')
+	negative_file = open(save_location + "/negative_set_" + str(k) + ".txt", 'wb')
 	
-#	for u in unl:
+	for y in range(len(clusteredData)):
+		if clusteredData[y] > 0:
+			print >> positive_file, unl[y]["text"].encode('utf-8')
+		else:
+			print >> negative_file, unl[y]["text"].encode('utf-8')
 	
-	
+	positive_file.close()
+	negative_file.close()
 
-	
-#		if pos_similarity > neg_similarity:
-#			positive_set.append(u["text"])
-#
-#		else:
-#			negative_set.append(u["text"])
-
-#	positive_file = open(save_location + "/positive_set_" + str(k) + ".txt", 'wb')
-#	negative_file = open(save_location + "/negative_set_" + str(k) + ".txt", 'wb')
+	print "Done. Files saved at " + save_location
 
 
-#	for p in positive_set:
-#		print >> positive_file, p.encode('utf-8')
 
-#	for n in negative_set:
-#		print >> negative_file, n.encode('utf-8')
-
-#	positive_file.close()
-#	negative_file.close()
-
-#	"Done. Files saved at " + save_location
