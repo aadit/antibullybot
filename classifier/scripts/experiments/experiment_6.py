@@ -1,6 +1,6 @@
 """
-   Experiment 4: Classify unlabelled tweets as bullying or nonbullying using SVM
-    -Positive Examples, Negative Examples, Unlabeled
+   Experiment 6: Measuring accuracy using pre-labelled positive and negative tweets
+    -Positive Examples, Negative Examples
 """
 
 
@@ -32,9 +32,9 @@ def transform(contextVectorList):
   	return Matrix
 
 
-def defineContextVectorMatrix(unl):
+def defineContextVectorMatrix(model):
 	cvMatrix = []
-	for u in unl:
+	for u in model:
 		cvMatrix.append(u["cv"])
 	return transform(cvMatrix)
 	
@@ -44,39 +44,41 @@ def perform_clustering(modelData, testData ,classes):
 	classifiedLabels = o.predict(testData)
 	return classifiedLabels;
 
+def calaccuracy(predictedClasses,ActualClasses):
+	count = 0;
+	x = 0;
+	for x in range(len(ActualClasses)):
+		if(predictedClasses[x] == ActualClasses[x]):
+			count = count + 1
+	acc = float(count)/float(len(ActualClasses)) 
+	acc = acc * 100
+	return acc
 
 
-save_location = '../../experiment_data/experiment_4'
-limit_1 = 300
-limit_2 = 300
+save_location = '../../experiment_data/experiment_6'
+
+limit_2 = 400
 
 k_list = [100]
 
 for k in k_list:
 	print "Running experiment for k = " + str(k)
 	ab = ABClassifier()
-	ab.download_cursors(limit_unlabeled = limit_1, limit_labeled = limit_1)
+	ab.download_cursors(limit_unlabeled = limit_2, limit_labeled = limit_2)
 	ab.run_lsa(k=k)
 
 	print "Starting classification..."
 
-	unlabeled_cursor   = ab.unlabeled_collection.find(timeout=False).limit(limit_1).skip(limit_1)
 	pos_cursor = ab.labeled_collection.find({"bully":True},timeout=False).limit(limit_2)
 	neg_cursor = ab.labeled_collection.find({"bully":False},timeout=False).limit(limit_2)
 
-	unl = []
 	pos = []
 	neg = []
 
-	for u,p,n in zip(unlabeled_cursor, pos_cursor, neg_cursor):
+	for p,n in zip(pos_cursor, neg_cursor):
 
-		u_obj = {}
 		p_obj = {}
 		n_obj = {}
-
-		u_obj["text"] = u["text"]
-		u_obj["cv"]   = ab.get_context_vector(u_obj["text"])
-		unl.append(u_obj)
 
 		p_obj["text"] = p["text"]
 		p_obj["cv"]   = ab.get_context_vector(p_obj["text"])
@@ -87,7 +89,7 @@ for k in k_list:
 		neg.append(n_obj)
 		
 
-	model = neg
+
 	
 	poslen = len(pos)
 	
@@ -96,28 +98,45 @@ for k in k_list:
 	classes = []
 	m = 0
 	n = 0
-	for m in range(len(model)):
+	for m in range(len(neg)-100):
 		classes.append(0);
 	n = 0
-	for n in range(0,poslen-20):
+	for n in range(0,poslen-120):
 		classes.append(1);	
-	for posl in range(len(pos)-20):
+	model = []
+	for negl in range(len(neg)-100):
+		model.append(neg[negl])
+	for posl in range(len(pos)-120):
 		model.append(pos[posl])
 	
 	model = defineContextVectorMatrix(model)
 		
-	testData = defineContextVectorMatrix(unl)
-	clusteredData =  perform_clustering(model, testData, classes)
-	print clusteredData
+	
+	testData = []
+	actualClasses = []
+	m = limit_2 - 120
+	n = limit_2 - 100
+	for m in range(poslen-120,poslen):
+		testData.append(pos[m])
+		actualClasses.append(1);
+	for n in range(neglen-100,neglen):
+		testData.append(neg[n])
+		actualClasses.append(0);
+	
+	testDataModel = defineContextVectorMatrix(testData);
+	clusteredData =  perform_clustering(model, testDataModel, classes)
+	
+	print "Accuracy: " , calaccuracy(classes, actualClasses);
+	
 	
 	positive_file = open(save_location + "/positive_set_" + str(k) + ".txt", 'wb')
 	negative_file = open(save_location + "/negative_set_" + str(k) + ".txt", 'wb')
 	
 	for y in range(len(clusteredData)):
 		if clusteredData[y] > 0:
-			print >> positive_file, unl[y]["text"].encode('utf-8')
+			print >> positive_file, testData[y]["text"].encode('utf-8')
 		else:
-			print >> negative_file, unl[y]["text"].encode('utf-8')
+			print >> negative_file, testData[y]["text"].encode('utf-8')
 	
 	positive_file.close()
 	negative_file.close()
