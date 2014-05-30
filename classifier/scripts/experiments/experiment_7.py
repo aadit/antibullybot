@@ -1,8 +1,8 @@
 """
-   Experiment 5: Threshold Classification:
+   Experiment 6: Example Tweet Similarity:
    -Compute SVDs
-   -Compute average pos/neg 
-   -Compute pairwise similarity pw(tweet, pos) pw(tweet, neg)
+   -Input: Sample tweet (set by user) 
+   -Compute pairwise similarity pw(tweet, sample)
    -Classify Tweet on higher similarity measure (or threshold?)
 """
 
@@ -17,10 +17,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 
-save_location = '../../experiment_data/experiment_5'
+save_location = '../../experiment_data/experiment_6'
 limit_1 = 2500
 
-k_list = [5, 10, 25, 50, 100, 150, 200, 300, 500]
 k = 150
 
 thresholds = [0.5, 0.6, 0.7, 0.75, 0.8, 0.85]
@@ -39,38 +38,39 @@ for t in thresholds:
 	results[int(t*100)] = results_obj
 
 
+ab = ABClassifier()
+ab.download_cursors(limit_unlabeled = limit_1, limit_labeled = limit_1)
+ab.run_lsa(k=k)
+context_tweets = [
+"Literally go fuck yourself, because you're honestly pathetic.", 
+"fuck you fuckin whore go fuck yourself stupid bitch",
+"but this bad I want to kick her ass cuz she thinks she's a hard chola like sit ur fat ass down lol",
+"course he did he's a whipped bitch that will say anything to make u happy, unlike ur mum who called u fat",
+"Fat pig. You're disgusting.",
+"From some illiterate online keyboard warrior? Go back to sucking your butt buddy's fat junk.",
+"God Says; Evil Don't Know The Way. You are gay with AIDS & your sin cost you your anointing! This is why you use DUST!"
+"fuck you stupid faggot fag"
+]
+
+
+tweet_cvs = []
+for c in context_tweets:
+	tweet_cvs.append(ab.get_context_vector(c))
+
 
 
 for i in xrange(0,1):
 	for t in thresholds:
 
-
 		print "Running experiment for t = " + str(t)
-		ab = ABClassifier()
-		ab.download_cursors(limit_unlabeled = limit_1, limit_labeled = limit_1)
-		ab.run_lsa(k=k)
 
 		print "Starting classification..."
 
 		unlabeled_cursor   = ab.db.tweets.find({"bullying_label" : {'$exists' :True}}, timeout = False)
-		pos_cursor = ab.labeled_collection.find({"bully":True},timeout=False).limit(limit_1)
-		neg_cursor = ab.labeled_collection.find({"bully":False},timeout=False).limit(limit_1)
-
-
-		p_avg = np.zeros(k)
-		n_avg = np.zeros(k)
-		for p,n in zip(pos_cursor, neg_cursor):
-
-			p_avg = p_avg + ab.get_context_vector(p["text"])
-
-			n_avg = n_avg + ab.get_context_vector(n["text"])
-
-		p_avg = p_avg/limit_1
-		n_avg = n_avg/limit_1
-
 
 		positive_set = []
 		negative_set = []
+
 
 		for u in unlabeled_cursor:
 
@@ -79,16 +79,21 @@ for i in xrange(0,1):
 			u_obj["cv"]   = ab.get_context_vector(u_obj["text"])
 			u_obj["bullying_label"] = u["bullying_label"]
 
-			pos_similarity = cosine_similarity(p_avg, u_obj["cv"])[0][0]
-			neg_similarity = cosine_similarity(n_avg, u_obj["cv"])[0][0]
+			similarities = []
 
-			#if pos_similarity > neg_similarity:
-				#positive_set.append(u_obj)
+			for t_cv in tweet_cvs:
+				similarities.append(cosine_similarity(t_cv, u_obj["cv"])[0][0])
 
-			if pos_similarity >= t:
-				positive_set.append(u_obj)
+			pos_set = False
 
-			else:
+			for s in similarities:
+				sim = float(s)
+				if sim > t:
+					positive_set.append(u_obj)
+					pos_set = True
+					break
+	
+			if not pos_set:
 				negative_set.append(u_obj)
 
 		positive_file = open(save_location + "/positive_set_" + str(t) + ".txt", 'wb')
