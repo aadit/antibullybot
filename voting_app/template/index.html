@@ -37,19 +37,11 @@
               </ul>
             </div><!--/.nav-collapse -->
       </div>
-      <h3>Do you think the following tweet is indicative of bullying?</h3>
       <!-- Main component for a primary marketing message or call to action -->
-      <div class="jumbotron">
-        <h2>{{ ttp.Parser().parse(text).html.encode("utf-8") }}</h2>
-
-        <form action="/vote" method="post">
-          <input type="hidden" name="id" value="{{_id}}"/>
-          <button class="btn btn-lg btn-danger" value=1 name="bully" >Bullying Tweet</button>
-          or
-          <button class="btn btn-lg btn-primary" value=0 name="bully">Not Bullying Tweet</button>
-          or
-          <button class="btn btn-lg btn-default" value=-1 name="bully">Don't Know</button>
-        </form>
+      <div class="jumbotron" style = "text-align:center">
+          <h3 style = "color:red">Warning: Explicit Content Ahead!</h3>
+          <h4>You will be classifying tweets from cyberbullies which may contain high amounts of profanity.</h4>
+          <a class="btn btn-lg btn-success" href = "/vote">Continue</a>
       </div>
 
     </div> <!-- /container -->
