@@ -18,7 +18,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 save_location = '../../experiment_data/experiment_3'
-limit_1 = 2500
+limit_1 = 10000
 
 k_list = [5, 10, 25, 50, 100, 150, 200, 300, 500]
 

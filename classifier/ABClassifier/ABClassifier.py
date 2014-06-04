@@ -11,6 +11,7 @@ from pymongo import MongoClient
 import nltk
 from nltk.corpus import stopwords
 from sklearn.metrics.pairwise import cosine_similarity
+import random
 
 
 #This class connects to a remote repository to fetch the labeled data and unlabeled data. 
@@ -60,7 +61,9 @@ class ABClassifier:
 
 		self.labeled_collection = self.db["tweets"]
 
-		self.unlabeled_cursor   = self.unlabeled_collection.find(timeout=False).limit(limit_unlabeled).batch_size(batch_size)
+		skip_num = random.randrange(0,110000)
+
+		self.unlabeled_cursor   = self.unlabeled_collection.find(timeout=False).limit(limit_unlabeled).skip(skip_num).batch_size(batch_size)
 		self.pos_labeled_cursor = self.labeled_collection.find({"bullying_label":"1"},timeout=False).limit(limit_labeled).batch_size(batch_size)
 		self.neg_labeled_cursor = self.labeled_collection.find({"bullying_label":"0"},timeout=False).limit(limit_labeled).batch_size(batch_size)
 
@@ -92,9 +95,10 @@ class ABClassifier:
 		self.pos_labeled_cursor.rewind()
 		self.neg_labeled_cursor.rewind()
 
+		print "Finished SVD"
+
 		return self.m
 
-		print "Finished SVD"
 
 	def get_context_vector(self, text):
 		tweet_tokens = self.do_nltk(text)

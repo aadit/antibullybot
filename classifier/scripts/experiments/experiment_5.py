@@ -18,9 +18,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 save_location = '../../experiment_data/experiment_5'
-limit_1 = 2500
+limit_1 = 10000
 
-k_list = [5, 10, 25, 50, 100, 150, 200, 300, 500]
 k = 150
 
 thresholds = [0.5, 0.6, 0.7, 0.75, 0.8, 0.85]
@@ -38,18 +37,15 @@ for t in thresholds:
 	results_obj['num_iterations'] = 0
 	results[int(t*100)] = results_obj
 
-
+ab = ABClassifier()
+ab.download_cursors(limit_unlabeled = limit_1, limit_labeled = limit_1)
+ab.run_lsa(k=k)
 
 
 for i in xrange(0,1):
 	for t in thresholds:
 
-
 		print "Running experiment for t = " + str(t)
-		ab = ABClassifier()
-		ab.download_cursors(limit_unlabeled = limit_1, limit_labeled = limit_1)
-		ab.run_lsa(k=k)
-
 		print "Starting classification..."
 
 		unlabeled_cursor   = ab.db.tweets.find({"bullying_label" : {'$exists' :True}}, timeout = False)
@@ -93,6 +89,8 @@ for i in xrange(0,1):
 
 		positive_file = open(save_location + "/positive_set_" + str(t) + ".txt", 'wb')
 		negative_file = open(save_location + "/negative_set_" + str(t) + ".txt", 'wb')
+		false_positive_file = open(save_location + "/false_positive_set_"+ str(t) + ".txt", "wb")
+		false_negative_file = open(save_location + "/false_negative_set_"+ str(t) + ".txt", "wb")
 
 
 		true_pos = 0
@@ -102,15 +100,22 @@ for i in xrange(0,1):
 			print >> positive_file, p["text"].encode('utf-8')
 			if p["bullying_label"] == "1":
 				true_pos = true_pos + 1
+			else:
+				print >> false_positive_file, p["text"].encode('utf-8')
+
 
 		for n in negative_set:
 			print >> negative_file, n["text"].encode('utf-8')
 			if n["bullying_label"] == "0":
 				true_neg = true_neg + 1
+			else:
+				print >> false_negative_file, n["text"].encode('utf-8')
+
 
 		positive_file.close()
 		negative_file.close()
-
+		false_positive_file.close()
+		false_negative_file.close()
 		#compute results
 		t = int(100*t)
 		results_obj = results[t]
@@ -131,7 +136,7 @@ for i in xrange(0,1):
 for t in thresholds:
 	r = results[int(t*100)]
 	print " " 
-	print "t: %i" % (r["t"])
+	print "t: %f" % (r["t"])
 	print "num positive: %i " % (r["pos_list_size"])
 	print "num negative: %i" % (r["neg_list_size"])
 	print "true pos rate: %f" % (r['true_pos_rate'])
