@@ -10,6 +10,8 @@ from scipy import linalg
 from pymongo import MongoClient
 import nltk
 from nltk.corpus import stopwords
+from sklearn.metrics.pairwise import cosine_similarity
+
 
 #This class connects to a remote repository to fetch the labeled data and unlabeled data. 
 #It also itnerfaces with the CoMatrix class to perfrom LSA, and with Clustering class to perform SVM, KMeans, etc
@@ -41,6 +43,7 @@ class ABClassifier:
 
 		print "Connected."
 
+
 	def download_cursors(self, limit_unlabeled = 100, limit_labeled = 100, batch_size = 120):
 		
 		print "Downloading cursors with batch size " + str(batch_size) + "..."
@@ -50,6 +53,19 @@ class ABClassifier:
 		self.neg_labeled_cursor = self.labeled_collection.find({"bully":False},timeout=False).limit(limit_labeled).batch_size(batch_size)
 
 		print "Downloaded."
+
+	def download_tweet_cursors(self, limit_unlabeled = 100, limit_labeled = 100, batch_size = 120):
+		
+		print "Downloading cursors with batch size " + str(batch_size) + "..."
+
+		self.labeled_collection = self.db["tweets"]
+
+		self.unlabeled_cursor   = self.unlabeled_collection.find(timeout=False).limit(limit_unlabeled).batch_size(batch_size)
+		self.pos_labeled_cursor = self.labeled_collection.find({"bullying_label":"1"},timeout=False).limit(limit_labeled).batch_size(batch_size)
+		self.neg_labeled_cursor = self.labeled_collection.find({"bullying_label":"0"},timeout=False).limit(limit_labeled).batch_size(batch_size)
+
+		print "Downloaded."
+
 
 
 	#run lsa on unlabeled and labeled cursors
@@ -162,7 +178,9 @@ class ABClassifier:
 		keys = itertools.permutations(indeces, 2)
 		dist_map = {}
 		for i,j in keys :
-			dist_map[(i,j)] = self.compute_cosine_similarity(cv_list[i], cv_list[j])
+			#dist_map[(i,j)] = self.compute_cosine_similarity(cv_list[i], cv_list[j])
+			dist_map[(i,j)] = cosine_similarity(cv_list[i], cv_list[j])[0][0]
+
 		return dist_map
 
 
