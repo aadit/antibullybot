@@ -13,14 +13,13 @@ import random
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn import svm
 import sklearn
-
+from sklearn.cluster import KMeans
 
 
 save_location = '../../experiment_data/experiment_13'
 
 k_list = [25, 50, 75, 100, 150, 200, 250, 300]
 
-kernel_list = ["linear", "poly_2", "poly_3", "rbf"]
 
 # results -> k -> kernal
 results = []
@@ -36,12 +35,14 @@ for k in k_list:
 	ab.download_tweet_cursors(limit_unlabeled = 5000, limit_labeled = 5000)
 	ab.run_lsa(k=k)
 
-	pos_cursor_training = ab.labeled_collection.find({"bullying_label":"1"},timeout=False).limit(400)
-	neg_cursor_training = ab.labeled_collection.find({"bullying_label":"0"},timeout=False).limit(400)
+	pos_cursor_training = ab.labeled_collection.find({"bullying_label":"1"},timeout=False).limit(500)
+	neg_cursor_training = ab.labeled_collection.find({"bullying_label":"0"},timeout=False).limit(500)
 
 	#pos_cursor_training = ab.labeled_collection.find({"bully":True},timeout=False).limit(400)
 	#neg_cursor_training = ab.labeled_collection.find({"bully":False},timeout=False).limit(400)
 
+	pos_size = 0
+	neg_size = 0
 	training = []
 	tlabels = []
 
@@ -55,22 +56,43 @@ for k in k_list:
 		cv = ab.get_context_vector(p["text"])
 		training.append(cv/np.linalg.norm(cv))
 		tlabels.append(1)
+		pos_size = pos_size + 1
 
 	for n in neg_cursor_training:
 		cv = ab.get_context_vector(n["text"])
 		training.append(cv/np.linalg.norm(cv))
 		tlabels.append(-1)
+		neg_size = neg_size + 1
 
 
-	#pos_cursor_validation = ab.db["tweets"].find({"bullying_label":"1"},timeout=False)
-	#neg_cursor_validation = ab.db["tweets"].find({"bullying_label":"0"},timeout=False)
-	
-	#get validation data
-	pos_cursor_validation = ab.labeled_collection.find({"bullying_label":"1"},timeout=False).skip(400)
-	neg_cursor_validation = ab.labeled_collection.find({"bullying_label":"0"},timeout=False).skip(400)
+	kmeans = KMeans(init='k-means++', n_clusters=2, n_init=100)
+	n = kmeans.fit_predict(training)
 
+	cluster_1_pos = 0;
+	cluster_2_pos = 0;
+	cluster_1_neg = 0;
+	cluster_2_neg = 0;
 
+	for i in xrange(0,pos_size-1):
+		if n[i] == 1:
+			cluster_1_pos += 1
+		else:
+			cluster_2_pos += 1
 
+	for i in xrange(pos_size, neg_size + pos_size - 1):
+		if n[i] == 1:
+			cluster_1_neg += 1
+
+		else:
+			cluster_2_neg += 1
+
+	cluster_1_pos_rate = float(cluster_1_pos)/(cluster_1_pos + cluster_1_neg)
+	cluster_2_pos_rate = float(cluster_2_pos)/(cluster_2_pos + cluster_2_neg)
+
+	print cluster_1_pos_rate
+	print cluster_2_pos_rate
+
+"""
 	for p in pos_cursor_validation:
 		cv = ab.get_context_vector(p["text"])
 		pos_validation.append(cv/np.linalg.norm(cv))
@@ -132,6 +154,6 @@ with open(save_location +'/scores.csv', 'wb') as f:
 	keys = ["k", "kernel", "pos_score", "neg_score", "total_score"]
 	writer = csv.DictWriter(f,keys)
 	writer.writerows(results)
-
+"""
 
 

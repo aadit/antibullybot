@@ -19,7 +19,7 @@ save_location = '../../experiment_data/experiment_12'
 
 k_list = [25, 50, 75, 100, 150, 200, 250, 300]
 
-kernel_list = ["linear", "poly", "rbf"]
+kernel_list = ["linear", "poly_2","poly_3", "rbf"]
 
 # results -> k -> kernal
 results = []
@@ -31,7 +31,7 @@ limit_2 = 400 #validation set
 for k in k_list:
 	print "Running experiment for k=" + str(k) + "..."
 	ab = ABClassifier()
-	ab.download_cursors(limit_unlabeled = 10000, limit_labeled = 10000)
+	ab.download_cursors(limit_unlabeled = 5000, limit_labeled = 5000)
 	#ab.download_tweet_cursors(limit_unlabeled = 800, limit_labeled = 1000)
 	ab.run_lsa(k=k)
 
@@ -51,11 +51,13 @@ for k in k_list:
 
 
 	for p in pos_cursor_training:
-		training.append(ab.get_context_vector(p["text"]))
+		cv = ab.get_context_vector(p["text"])
+		training.append(cv/np.linalg.norm(cv))
 		tlabels.append(1)
 
 	for n in neg_cursor_training:
-		training.append(ab.get_context_vector(n["text"]))
+		cv = ab.get_context_vector(n["text"])
+		training.append(cv/np.linalg.norm(cv))
 		tlabels.append(-1)
 
 
@@ -68,19 +70,31 @@ for k in k_list:
 
 
 	for p in pos_cursor_validation:
-		pos_validation.append(ab.get_context_vector(p["text"]))
+		cv = ab.get_context_vector(p["text"])
+		pos_validation.append(cv/np.linalg.norm(cv))
 		pos_vlabels.append(1)
 
 	for n in neg_cursor_validation:
-		neg_validation.append(ab.get_context_vector(n["text"]))
+		cv = ab.get_context_vector(n["text"])
+		neg_validation.append(cv/np.linalg.norm(cv))
 		neg_vlabels.append(-1)
 
 	for kernel in kernel_list:
 
+
+		scores = {}
+		scores["k"] = k
+		scores["kernel"] = kernel
+
 		print "Performing SVM for " + kernel + "..."
 		degree = 1
-		if kernel == "poly":
+		if kernel == "poly_2":
+			kernel = "poly"
 			degree = 2
+
+		if kernel == "poly_3":
+			kernel = "poly"
+			degree = 3
 
 		clf = svm.SVC(kernel=kernel, degree = degree, max_iter = 5000000)
 		clf.fit(training, tlabels) 
@@ -95,9 +109,6 @@ for k in k_list:
 
 		total_score = clf.score(pos_validation+neg_validation,pos_vlabels + neg_vlabels)
 
-		scores = {}
-		scores["k"] = k
-		scores["kernel"] = kernel
 		scores["pos_score"] = pos_score
 		scores["neg_score"] = neg_score
 		scores["total_score"] = total_score
