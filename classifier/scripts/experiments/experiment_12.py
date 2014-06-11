@@ -13,13 +13,15 @@ import random
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn import svm
 
+def my_kernel (x, y):
+	return np.dot(x,y.T)/(np.linalg.norm(x) * np.linalg.norm(y))
 
 
 save_location = '../../experiment_data/experiment_12'
 
 k_list = [25, 50, 75, 100, 150, 200, 250, 300]
 
-kernel_list = ["linear", "poly_2","poly_3", "rbf"]
+kernel_list = ["custom", "linear", "poly_2","poly_3", "rbf"]
 
 # results -> k -> kernal
 results = []
@@ -95,6 +97,10 @@ for k in k_list:
 		if kernel == "poly_3":
 			kernel = "poly"
 			degree = 3
+
+		if kernel == "custom":
+			kernel = my_kernel
+			degree = 1
 
 		clf = svm.SVC(kernel=kernel, degree = degree, max_iter = 5000000)
 		clf.fit(training, tlabels) 
